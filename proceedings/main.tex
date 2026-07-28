@@ -1,0 +1,450 @@
+\documentclass[letterpaper]{physor2026}
+
+%%% Packages Required by Class (already included)
+% fancyhdr
+% lastpage
+% titling
+% titlesec
+% ragged2e
+% enumitem
+% amsmath
+% graphicx
+% geometry
+% newtxtext
+% newtxmath
+% hyperref
+% cleveref
+% caption
+% authblk
+% apptools
+% appendix
+% ifpdf
+% epstopdf
+
+%%% Some other useful packages
+% \usepackage{tikz}
+% \usepackage{color}
+\usepackage{subcaption}
+\usepackage{float}
+% \usepackage{algcompatible}
+% \usepackage{bm}
+% \usepackage{array}
+
+\usepackage{nomencl} % If needed
+\makenomenclature
+
+
+\title{A Correction Ratio Approach to Fission Matrix Interpolation in Systems with Large Temperature Differences}
+
+%%% Authors (use arabic numbers: 1, 2, 3, etc. for affiliationNumber)
+%%% \addAuthor{GivenName MiddleInitial. FamilyName}{affiliationNumber}
+\addAuthor[christian.vita@polito.it]{Christian Vita}{1,2}
+\addAuthor{William Walters}{2}
+\addAuthor{Valerio Mascolino}{4,5}
+\addAuthor{Nathan Roskoff}{2}
+\addAuthor{Fausto Franceschini}{3}
+\addAuthor{Nicolò Abrate}{1}
+\addAuthor{Sandra Dulla}{1}
+
+
+%\addAuthor[Email address for primary/corresponding author only. Move the * next to the %appropriate name. Do not use all capital letters for any part of the author's name]{Author F}{1} 
+
+% Only one author should give email for correspondence
+% To move the * for the corresponding author move the Email address for primary/corresponding author only. Move the * next to the appropriate name. Do not use all capital letters for any part of the author's name] and insert it before the Author addition ex. if corresponding author is A then adjust \addAuthor[email]{Author A}{1}
+
+%%% Affiliations (from authblk)
+%%% \addAffiliation{affiliationNumber}{Name of Institute, City, State/Country}
+\addAffiliation{1}{Politecnico di Torino, DENERG, NEMO group, Turin, Italy}
+\addAffiliation{2}{Westinghouse Electric Company, Cranberry, PA, USA}
+\addAffiliation{3}{Westinghouse Mangiarotti, Monfalcone, Italy}
+\addAffiliation{4}{Nuclear Science and Engineering, Colorado School of Mines, Golden, CO, USA}
+\addAffiliation{5}{Mechanical Engineering Department, Colorado School of Mines, Golden, CO, USA}
+
+
+%%% Write text for abstract
+%%% Most text modifying commands will work in abstract
+\Abstract{
+
+In this work, the Fission Matrix (FM) method is applied to Heat-Pipe Micro-Reactors (HPMRs). A set of FMs is generated through core simulations performed with the Serpent code, producing a database of matrices corresponding to different uniform temperature conditions. This database enables the construction of interpolated FMs for arbitrary temperature distributions within the reactor core.
+To address the limitation of local temperature dependence — where interpolation considers only the temperature of the cell in which the fission event occurs, neglecting the influence of surrounding assemblies — a correction approach is introduced: a correction ratio is defined to mitigate this assumption and improve interpolation accuracy.
+Several Test cases demonstrate the systematic improvement achieved in estimating the effective multiplication factor ($k_{\text{eff}}$) and the fission source distribution ($F$) when applying the proposed method. The results outcome of this work extends the applicability of the FM method for reactor, like HPMRs, being under variying thermal conditions, even off-design conditions, supporting more reliable reactor design and safety analysis.
+
+}
+
+
+%%% List up to 5 keywords separated by a comma
+\keywords{Fission matrix, correction ratio, HPMR, temperature}
+
+%%% Provide a short title for the header on odd pages
+\shortTitle{Correction Ratio for Fission Matrix Interpolation in Systems with Large Temperature Differences}
+
+%%% Provide a short author listing for the header on even pages
+\authorHead{C. Vita, et al.}
+
+%%% If LaTeX reports the line number of an error at \begin{document} it
+%%%   is most likely due to an error in one of the commands above
+\begin{document}
+
+\section{Introduction}\label{sec:1}
+% Monte Carlo methods are widely regarded as the most accurate approach for neutronics analysis, thanks to their continuous treatment of angular and energy variables and their ability to model complex geometries with high fidelity. However, achieving low statistical uncertainty—especially for localized tallies—requires significant computational effort, making pure Monte Carlo simulations impractical for tasks such as full-core reactor modeling, transient analyses, or criticality searches.
+
+% To overcome these limitations, hybrid strategies have been developed, including the Fission Matrix (FM) method \cite{Carney2014}. In this approach, the reactor domain is divided into $N$ fissionable regions, and the average number of neutrons produced in cell $i$ by fission reactions initiated in cell $j$ is recorded, forming an $N \times N$ matrix $\mathbf{A}$. Its dominant eigenvector represents the spatial fission source distribution $F$, while the largest eigenvalue corresponds to $k_{\text{eff}}$. The FM method has been successfully applied in spent-fuel pool analysis, full-core simulations, and transient studies \cite{Walter00,Walters2018,Laureau2015}, and is implemented in the RAPID code \cite{RAU2020103273,Mascolino2022_triga,Mascolinoflattop}.
+
+% Two main strategies exist for building a fission matrix: criticality calculations and fixed-source calculations. The criticality approach uses a converged fission source and offers mesh-independent accuracy but requires large memory and source convergence. The fixed-source approach avoids convergence issues and reduces memory needs but demands many simulations to approximate the global source distribution, making full-core applications costly. To improve efficiency, the Combined Fission Matrix (CFM) method was introduced in RAPID \cite{Terlizzi02092019}.
+
+% In this work, a simplified VTB-HPMR model with a small core and assembly-level resolution is considered, allowing the use of the criticality approach. A database of fission matrices is generated for different system conditions (e.g., temperature profiles, control positions), and interpolation is used to predict arbitrary states. This study focuses on temperature effects, where previous FM-based approaches have relied on the local-temperature-dependence assumption. While effective for mild gradients, this assumption loses accuracy under strong temperature variations because cross-section changes affect neutron interactions beyond the local cell.
+
+% To address this, we propose a correction ratio that extends FM applicability to cases with significant temperature gradients, requiring only one additional matrix beyond the standard database.
+
+Monte Carlo methods are widely recognized as among the most accurate techniques for neutronics analysis. Their strength lies in the continuous treatment of angular and energy variables and in the ability to represent complex geometries with high fidelity. However, achieving source convergence and sufficiently low statistical uncertainties — particularly for localized tallies — requires a significant computational effort. This makes pure Monte Carlo simulations less practical for tasks that involve numerous calculations, such as full-core reactor modeling, transient analyses, or criticality search analyses.   
+
+To address these limitations, hybrid methodologies have been developed, including approaches based on the Fission Matrix (FM) method \cite{Carney2014}. In this method, the reactor domain is divided into $N$ fissionable regions (cells). For each pair of cells, the average number of neutrons produced in cell $i$ by fission reactions induced by a neutron born in cell $j$ is recorded. These values form an $N \times N$ matrix, known as the fission matrix $\mathbf{A}$. In multiplying systems, the dominant eigenvector of $\mathbf{A}$ represents the spatial distribution of the fission source, hereby referred to as  $F$, while its largest eigenvalue corresponds to the effective multiplication factor, $k_{eff}$.
+The FM method has been successfully applied in several contexts, including spent-fuel pool analysis \cite{Walter00}, full-core reactor simulations \cite{Walters2018}, and transient studies \cite{Laureau2015}. 
+Among the computational tools implementing this methodology, the RAPID code represents a notable example, having undergone extensive computational and experimental validation that demonstrates the robustness and accuracy of the FM-based approach \cite{RAU2020103273,Mascolino2022_triga,Mascolino_trapid}.
+
+As extensively described in the cited FM works, there are generally two ways to build a fission matrix: through a criticality calculation or a fixed-source calculation. The criticality approach tallies the fission response between spatial cells using a converged fission source, so its accuracy does not depend on the tally mesh. This method, however, can face challenges with source convergence and requires significant memory for large systems.  
+The fixed-source approach, while more flexible and less sensitive to convergence issues, demands assumptions on the global source distribution and often a very fine spatial decomposition, making full-core applications computationally expensive.
+
+In this study, a simplified version of the original design of the VTB-HPMR model is considered, featuring a very small core design. Moreover, the required level of detail for the fission source results is at the assembly level. For these reasons, the fission matrix can be generated using the first approach (i.e., criticality calculation), as the resulting matrices will have a manageable size.
+The FM method consists in  generating a database made of fission matrices generated at different conditions of the system (e.g., changing the temperature profile, control drums/rods position, boron concentration, burnup level). Once the database is obtained, its entries are interpolated to generate a configuration-specific FM that reflects an arbitrary core condition within the database validity range.
+
+This study focuses on the impact of the system's temperature distribution on the variation of the FM.
+Although temperature has long been used as a parameter in FM-based approaches, most studies adopt the assumption of \textit{local temperature dependence},meaning that each matrix element is interpolated using only the temperature of its associated cell. 
+However, applying the FM method to systems with non-uniform temperature profiles introduces challenges: which temperature should be used for a given element $a_{ij}$, the source cell ($j$), the destination cell ($i$), or both? Considering both would lead to a quadratic increase in combinations, making the database prohibitively large and costly to generate. 
+Previous studies have proposed alternatives to overcome this limitation: some approaches rely on generating a database with proportional-to-power temperature distributions, while others generate databases where FM temperature profiles are provided by an external code, giving a more realistic information of the temperature field. These strategies avoid the simple approach of using a database made of uniform temperature cases and aim to better capture realistic system conditions \cite{Rau2021}.   
+
+This work proposes a methodology to extend the applicability of the FM method to scenarios with strong temperature gradients, improving accuracy under both normal operating conditions and extreme off-operating conditions. This is achieved by introducing a correction ratio that requires generating only two additional FMs beyond those in the database, to account for temperature differences between source and destination cells. In this way, a simple database of uniform temperature distributions can still be used while enabling better predictions for arbitrary temperature profiles.
+
+
+
+\section{System Geometry Description}
+The model used in this work is based on the Micro-Reactor design under analysis at the Argonne National Laboratory (ANL) by the NEAMS Micro-Reactor Application Drivers area (\cite{Stauff2024}). As a modeling exercise, the micro-reactor concept was designed at ANL to gather some of the most pressing modeling challenges faced by the micro-reactor industry.
+In this study, the adopted geometry is a modified version of the HPMR, where the core is made of 127 assemblies arranged inside a graphite monolith. Each assembly contains three different kind of rods: moderator, heat pipe, and fuel pin. The latest are made of TRISO fuel particles dispersed within a graphite matrix. The TRISO fuel is Low-Enriched Uranium (LEU) enriched at 19.95\%, in UCO form, at a packing fraction of 40\%. The core is surrounded by a beryllium radial reflector. The heat removal system uses heat pipes. With respect to the original model the control rods are removed and the system is considered to be axially infinite. That way, it is possible to deal with a 2D model, which turns out to be more practical for the purposes of this work.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[scale=0.5]{proceedings/pics/VTB_core_and_assembly.png}
+    \caption{Full core geometry (left) and zoomed-in view of a fuel assembly (right).}
+    \label{fig:sample}
+\end{figure}
+
+
+\section{Methodology}
+\subsection{Database Generation and Linear Interpolation Scheme}
+In this study, the Serpent software code \cite{LEPPANEN2025} is adopted to generate a relatively simple database. Eight different FMs are generated considering the system at different uniform temperature, starting from 300 K to 1000 K, with a step of 100 K. The Serpent criticality calculations for these cases are run using $10^5$ particles per cycle, $500$ active cycles, and $30$ inactive cycles. The total generation time was 14.4 hours on 30 cores of Intel® Xeon® Gold 6130 processors at 2.1 GHz.   
+Once the database is obtained, it is possible to generate an interpolated FM, based on any arbitrary temperature distribution inside the core, and, thanks to the local temperature dependence assumption, the following linear interpolation is made: 
+
+\begin{equation}\label{eq:linear_interpolation}
+     a_{ij}(T_i)= a_{ij}^{-} + \frac{T_i-T_i^{-}}{T_i^{+}-T_i^{-}} \cdot (a_{ij}^{+}-a_{ij}^{-}),
+\end{equation}
+where
+\begin{itemize}
+    \item $a_{ij}(T_i)$: interpolated value of the fission matrix element $a_{ij}$ at the arbitrary defined temperature $T_i$ in cell $i$.
+    \item $a_{ij}^{-}$: value of the fission matrix element at the first lower temperature value ($T_i^-$) of the database with respect to $T_i$.
+    \item $a_{ij}^{+}$: value of the fission matrix element at the first higher temperature value ($T_i^+$) of the database with respect to $T_i$.
+\end{itemize}
+
+\subsection{Core Temperature Correction Ratio}
+The definition of the correction for the core temperature stems from the work in \cite{Rau2020} on the so-called "step perturbation method". While this methodology was explored and applied only to a single-pin case, in this work we aim at developing a method suitable for full-core analysis, which requires a different strategy to define the correction ratio.
+To establish the Core Temperature Correction Ratio (CTCR), two additional cases are introduced. These cases adopt a Dirac's $\delta$-like temperature distribution, where the central assembly is set to the maximum/minimum temperature available in the FM database (1000/300 K for this work), while the rest of the system is at the minimum/maximum temperature (300/1000 K), as illustrated in \cref{fig:correction_ratio_temperature_system_used} and \cref{fig:correction_ratio_temperature_system_used_300}.
+
+% \begin{figure}[!ht]
+%     \centering
+%     \begin{subfigure}[b]{0.40\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{proceedings/pics/correction_ratio_temperature_system_used.png}
+%         \caption{Temperature distribution of the additional case for CTCR definition.}
+%         \label{fig:temperature_distribution_dirac_distribution}
+%     \end{subfigure}
+%     \hspace{0.05\textwidth}
+%     \begin{subfigure}[b]{0.4\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{proceedings/pics/correction_ratio_distribution_over_a_sextant.png}
+%         \caption{Correction ratio values $r_{ij}$.}
+%         \label{fig:correction_ratio_distribution_over_a_sextant}
+%     \end{subfigure}
+%     \caption{}
+%     \label{fig:comparison}
+% \end{figure}
+
+% \begin{figure}[!ht]
+%     \centering
+%     \includegraphics[scale=0.65]{proceedings/pics/correction_ratio_temperature_system_used.png}
+%     \caption{Temperature distribution of the additional case for CTCR definition.}
+%     \label{fig:temperatrue_distribution_dirac_distribution}
+% \end{figure}
+
+For both cases an equivalent interpolated FM is generated and used to define the matrix R, as follow: 
+\begin{equation}\label{eq:linear_interpolation}
+     r_{ij}= \frac{a_{ij}^{dirac}}{a_{ij}^{interp}}, 
+\end{equation}
+where $a_{ij}^{interp}$ is generated by interpolating the database using the same temperature distribution considered to generate the elements $a_{ij}^{dirac}$. This ratio essentially quantifies the discrepancy introduced by the local-temperature-dependence.
+Since the only "perturbed" region is the central cell (called $C$), only the corresponding row of the matrix R will be used. Moreover, the vector $r_{i=C,j}$ has many redundant items, due to the symmetry of the problem, besides the small statistical fluctuations. For this reason only the corresponding element of one sextant will be selected and used.
+Finally, by defining the correction ratio in this way, it is not possible to cover all the relative distances between cells: the maximum distance between the central cell and the others of the system is equal to 6 times the pitch of the core lattice, while the longest distance between two assemblies of the system is 12 times the core lattice pitch. However, in \cref{fig:correction_ratio_distribution_over_a_sextant} and \cref{fig:correction_ratio_distribution_over_a_sextant_central_300} it can be observed that the $r_{i=C,j}$ values quickly reach a value of 1 after the relative distance between the $i$ and $j$ cells becomes greater than twice the assembly pitch.  
+
+
+% \begin{figure}[!ht]
+%     \centering
+%     \begin{subfigure}[b]{0.40\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{proceedings/pics/correction_ratio_temperature_system_used.png}
+%         \caption{Temperature distribution of the additional case for CTCR definition.}
+%         \label{fig:temperature_distribution_dirac_distribution}
+%     \end{subfigure}
+%     \hspace{0.05\textwidth}
+%     \begin{subfigure}[b]{0.4\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{proceedings/pics/correction_ratio_distribution_over_a_sextant.png}
+%         \caption{Correction ratio values $r_{ij}$.}
+%         \label{fig:correction_ratio_distribution_over_a_sextant}
+%     \end{subfigure}
+%     \caption{}
+%     \label{fig:comparison}
+% \end{figure}
+
+\begin{figure}[!ht]
+    \centering
+    % Prima riga
+    \begin{subfigure}[b]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{proceedings/pics/correction_ratio_temperature_system_used.png}
+        \caption{Temperature distribution of the case for final cell with higher temperature.}
+        \label{fig:correction_ratio_temperature_system_used}
+    \end{subfigure}
+    \hspace{0.00000005\textwidth}
+    \begin{subfigure}[b]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{proceedings/pics/correction_ratio_distribution_over_a_sextant.png}
+        \caption{$r_{i=c,j}$ distribution of the case for final cell with higher temperature.}
+        \label{fig:correction_ratio_distribution_over_a_sextant}
+    \end{subfigure}
+
+    \vspace{0.1cm} % Spazio tra le righe
+
+    % Seconda riga
+    \begin{subfigure}[b]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{proceedings/pics/correction_ratio_temperature_system_used_300.png}
+        \caption{Temperature distribution of the case for final cell with lower temperature.}
+        \label{fig:correction_ratio_temperature_system_used_300}
+    \end{subfigure}
+    \hspace{0.00000005\textwidth}
+    \begin{subfigure}[b]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{proceedings/pics/correction_ratio_distribution_over_a_sextant_central_300.png}
+        \caption{$r_{i=c,j}$ distribution of the case for final cell with lower temperature.}
+        \label{fig:correction_ratio_distribution_over_a_sextant_central_300}
+    \end{subfigure}
+
+    \caption{Additional cases temperature distributions and corresponding $r_{i=C,j}$, used to define the CTCR.}
+    \label{fig:temprature_distribution_and_ratios}
+\end{figure}
+
+Therefore, when a generic temperature distribution is used to define a FM, whose elements are $a_{k,l}^{interp}$, the following correction ratio will be applied:
+
+\begin{equation}\label{eq:linear_interpolation}
+     \hat{r}_{kl}(\Delta T_p,d)= \frac{\Delta T_p}{\Delta T_{dirac}} \cdot (r_{Cj}(\Delta T_p)-1)+1,
+\end{equation}
+where $\hat{r}_{kl}$ is the actual correction ratio applied to the generic FM, $a_{kl}^{inter}$, obtained by scaling the vector of  ratios $r_{Cj}$, which is selected according to the relative distance,$d$, between the cells ($C$,$j$) and ($k$,$l$) and the temperature difference between the two regions.
+
+
+ \section{Results}
+\cref{fig:temperature_distribution_testing_cases} shows all the six different test  temperature distributions used to demonstrate the effectiveness of the correction ratio. 
+The six cases are designed to verify the effectiveness of the CTCR in a wider spectrum of configurations, including: \begin{enumerate*}[label=\alph*)]
+    \item same cases used to generate the CTCR; \item single central assembly with higher temperature  \item symmetric and non-symmetric temperature distributions; \item localized regions with much higher temperatures than the nearby elements; \item gradual temperature changes with respect to the nearby assemblies
+\end{enumerate*}.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[scale=0.5125]{proceedings/pics/temperature_distribution_testing_cases_new_new_horiz.png}
+    \caption{Test cases temperature distributions.}
+    \label{fig:temperature_distribution_testing_cases}
+\end{figure}
+
+
+% \begin{figure}[!ht]
+%     \centering
+%     \includegraphics[scale=0.80]{proceedings/pics/test_case_1.png}
+%     \caption{Test case 0, temperature (left) fission source (top-right) and fission source relative error (bottom-right) distributions.}
+%     \label{fig:test_case_1}
+% \end{figure}
+
+% In these plots it is possible to observe that, without applying corrections, the method generally underestimates the contribution of the fission source in low-temperature regions and overestimates it in neutron-dominated areas, which reduces the particle population available in the central volume. As a result, the fission source in high-temperature zones is underestimated. Conversely, near the central assemblies—where the average surrounding temperature is higher (due to the presence of the central assembly), than those assumed for estimation—the non-local fission probability tends to be overestimated, while the local probability is underestimated.
+% To illustrate this behavior, consider the volume of the central assembly with a fuel temperature of 1000 K. Contributions to this region are computed using a fission matrix based on a uniform 1000 K temperature profile. In reality, the adjacent fuel is cooler, exhibits a softer neutron spectrum, and therefore absorbs more thermal neutrons.    
+
+The following integral metrics for the analyzed test cases are reported in \cref{tab:table_results_testing_case}: 
+
+%  \begin{enumerate*}[label=\alph*)]
+%     \item $k_{eff}^{ref}$ and its standard deviation ($\pm\sigma_{k_{eff}}$), both obtained by running the equivalent Serpent simulation; \item The difference between the multiplication factor of the interpolated FM and the reference value, $\Delta k_{eff}^{interp}$($\pm\sigma_{k_{eff}}$);  \item the difference between the multiplication factor of the interpolated corrected FM and the reference value, $\Delta k_{eff}^{corr}$($\pm\sigma_{k_{eff}}$), \item the $RMSE^{interp}$ of the interpolated fission source and the reference one and \item the $RMSE^{corr}$ of the interpolated and corrected fission source and the reference one.
+% \end{enumerate*}.
+
+\begin{itemize}
+    \item $k_{eff}^{ref}$ and its standard deviation ($\pm\sigma_{k_{eff}}$), both obtained by running the equivalent Serpent simulation;
+
+    \item the root mean square of the fission source uncertainty, $RMS(\sigma_F)$, obtained by running the equivalent Serpent simulation;
+    
+    \item the difference between the multiplication factor of the interpolated FM and the reference value, $\Delta k_{eff}^{interp}$($\pm\sigma_{k_{eff}}$);
+    
+    \item the difference between the multiplication factor of the interpolated and corrected FM and the reference value, $\Delta k_{eff}^{corr}$($\pm\sigma_{k_{eff}}$);
+    
+    \item the root mean square error of the interpolated fission source and the reference one, $RMS(F^{interp})$;
+
+    \item the root mean square error of the corrected fission source and the reference one, $RMS(F^{corr})$.
+    
+\end{itemize}
+
+
+\begin{table}[!ht]
+    \centering
+    \caption{Test cases integral results}
+    \begin{tabular}{lcccccc}
+        \toprule
+         
+         \textbf{}           & 
+         { $k_{eff}^{ref}$ ($\pm\sigma_{k_{eff}}$) } &
+         { $RMS(\sigma_F$) } & 
+         
+         {$ \Delta k_{eff}^{interp} $ } & 
+         {$\Delta k_{eff}^{corr}$} &   
+         {$ RMS(F^{interp}) $ } & 
+         {$ RMS(F^{corr})$ } \\ 
+         
+
+         \textbf{}           & 
+         { [-] } &
+         { \% } & 
+         
+         {[pcm] } & 
+         {[pcm]} &   
+         { \% } & 
+         { \% } \\ 
+         \midrule
+
+         \textbf{Test case 1}           & 
+         $1.15409$($\pm 15$) &
+         $0.60$ &
+         $80$ & 
+         $36$ &
+         $0.65$ &
+         $0.48$ \\ 
+         \midrule
+        
+         
+         \textbf{Test case 2}           & 
+         $1.12826$ ($\pm 16$) &
+         $0.60$ &         
+         $-55$ & 
+         $-27$ &
+         $0.80$ &
+         $0.65$ \\ 
+         \midrule
+
+         \textbf{Test case 3}           & 
+         $1.15162$ ($\pm 19$) &
+         $0.58$ &         
+         $54$ & 
+         $45$ &
+         $1.45$ &
+         $1.02$ \\ 
+         \midrule
+
+
+         % \textbf{Test case 3}           & 
+         % $1.14627$ ($\pm 19$) &
+         % $42$ & 
+         % $18$ &
+         % $0.97$ &
+         % $0.71$ \\ 
+         % \midrule
+
+         
+         \textbf{Test case 4}           & 
+         $1.14237$ ($\pm 15$) &
+         $0.60$ &         
+         $42$ & 
+         $29$ &
+         $2.08$ &
+         $1.44$ \\ 
+         \midrule
+
+    
+         \textbf{Test case 5}           & 
+         $1.14191$ ($\pm 17$) &
+         $0.60$ &
+         $-47$ & 
+         $-45$ &
+         $1.52$ &
+         $1.20$ \\
+         \midrule
+         
+         \textbf{Test case 6}           & 
+         $1.13520$ ($\pm 17$) &
+         $0.57$ &
+         $71$ & 
+         $-7$ &
+         $1.33$ &
+         $0.88$ \\ 
+
+
+         
+         
+         \bottomrule
+         
+    \end{tabular}
+    
+    \label{tab:table_results_testing_case}
+\end{table}
+
+Since the six test cases exhibit similar trends and do not show significant differences, only one example is shown. Specifically, \cref{fig:fission_source_test_case_1} illustrates the fission source obtained from the interpolated FM and the corrected FM for the first Test case. 
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[scale=0.55]{proceedings/pics/fission_source_test_case_1.png}
+    \caption{Fission source distributions of the reference, interpolated and corrected results of Test case 1.}
+    \label{fig:fission_source_test_case_1}
+\end{figure}
+
+It can be observed that the fission source obtained by solving the corrected fission matrix better reproduces the reference distribution. To clearly visualize the difference of the results between the interpolated case and the corrected one for each Test cases, in \cref{fig:fission_source_error_distribution} all the relative error distribution of the fission source are reported, along with the corresponding cell-wise uncertainty.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[scale=0.725]{proceedings/pics/fission_source_relative_error_only.png}
+    \caption{Fission source relative error distributions of the interpolated and corrected cases. The gray bands represent the cell-wise uncertainty.}
+    \label{fig:fission_source_error_distribution}
+\end{figure}
+
+In these plots, it can be observed that, without applying corrections, the method generally underestimates the contribution of the fission source in low-temperature regions and overestimates it in high-temperature regions. This behavior is easier to analyze in Test case 1 and Test case 2, although the same considerations apply to the other cases.
+
+In Test case 1, the central assembly is at 1000~K, and its corresponding FM elements are generated under the assumption that both local and non-local temperatures are equal to 1000~K. However, in the actual system, the surrounding assemblies have lower temperatures, resulting in a softer neutron spectrum. Consequently, these assemblies absorb more thermal neutrons, reducing the neutron availability for the central assembly. For this reason, the fission source in the high-temperature region is underestimated, while the opposite occurs for the surrounding elements at lower temperatures.
+
+In general, error peaks appear where strong temperature gradients exist. Comparing the error values of the central assemblies in Test cases 1 and 2 with those in other cases suggests that the error magnitude is proportional to the temperature difference between an assembly and its neighbors.
+
+In Test cases 5 and 6, the system shows a wide global temperature range, but the temperature differences between neighboring assemblies are much less pronounced. As previously mentioned, the correction mainly addresses correlations between neighboring cells: when the temperature difference with adjacent cells is larger, the correction has a stronger effect. This explains why the correction is more effective in Test case 6, where the average temperature difference with surrounding assemblies is 67.3~K, compared to 29.9 K in Test case 5. In other words, the larger local gradients in Test case 6 amplify the correction’s impact, improving the representation of inter-cell correlations.
+
+In general it is possible to observe a systematic improvement of the results when the correction ratio is applied, both for the integral results and for the fission source. 
+
+\section{Conclusions}
+In this study the Fission Matrix realizations are parametrised only with respect to the temperature, by generating a small database made of eight FMs, each of them tallied at a different uniform temperature, equally distributed between 300 K and 1000 K. Once the database is obtained, the FM method in principle allows to predict the $k_{eff}$ and $F$ of the system in a very short amount of time (less then a second on a personal computer), thus basically shifting all the computational burden in the preliminary, off-line phase.     
+To manage a feasible amount of data, while accounting for temperature variations within the system, the most common strategy is to adopt the local-temperature-dependence assumption when interpolating the FM coefficients. Under this assumption, the interpolation of the database relies solely on the temperature of the destination cell. However, this simplification neglects the influence of neighboring cells at different temperatures on the interpolated value. To address this limitation, a correction factor was introduced, enabling a correlation between the temperatures of the “starting” and “final” cells.
+The application of this correction to the fission matrix demonstrated an improvement of result agreement with respect to the reference values. 
+
+It is important to highlight that although the temperature profiles considered in this study are not fully representative of normal operating conditions, the proposed method significantly extends the applicability of the FM approach. This is particularly relevant for off-normal scenarios, such as transients where, for example, some core heat pipes may fail. 
+
+\section*{ACKNOWLEDGEMENTS}
+The authors would like to acknowledge that the research activity of the PhD project is sponsored by the Italian funding plan "Piano Nazionale Ripresa e Resilienza" (PNRR) and by Westinghouse Electric Company to support the development of methods for advanced reactors. 
+This work has been carried over during the author's internship period at Westinghouse Electric Company.
+The methodology developed is an extension of the studies previously made during the author's internship activity at Argonne National Laboratory under the supervision and support of Dr. Nicolas Stauff and his research team.
+
+
+
+\bibliographystyle{physor2026}
+\bibliography{main}
+
+% \appendix
+
+% \section{}
+% If necessary, include Appendices numbered in upper case alphabetical order.
+
+% To ensure a uniform, professional look at the proceedings, please only modify the format of this template after checking with the publication chair first.
+
+
+\end{document}
