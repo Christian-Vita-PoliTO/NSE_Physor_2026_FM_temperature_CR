@@ -420,7 +420,9 @@ Mean $|\cdot|$           & 40.8  & 31.0  & 1.275 & 0.956 \\ \hline
 
 Combining $\sigma_{\text{ref}}$ (Sec.~\ref{sec:res_reference}) with $\sigma_{\text{database}}$ from the analytical model (Sec.~\ref{sec:validation}) in quadrature gives the total uncertainty $\sigma_{\text{tot}}$ of Eq.~(\ref{eqn:sigma_tot}). Under this combined budget, 58\% of the corrected cases fall within $|z|<2$ (median $|z|=1.30$), against 42\% of the raw cases (median $|z|=2.18$): a consistent and, for the corrected variant, now a majority of cases. $\sigma_{\text{database}}$ is 14--22~pcm against 9--12~pcm for $\sigma_{\text{ref}}$ in every case, so the database term still dominates the budget and both variants are judged against a relatively wide band.
 
-Rather than collapsing this budget to a single $\pm2\sigma_{\text{tot}}$ number per case, Figures~\ref{fig:fig4} and~\ref{fig:fig5}--\ref{fig:fig5b} show the full picture: every one of the $N=500$ analytical-model realizations (gray) and, since 150 genuinely independent brute-force replicas of the whole database already exist (Sec.~\ref{sec:four_methods}), every one of those true replicas too (blue open circles), alongside the reference case's own $\pm2\sigma_{\text{ref}}$ (pink band) and the raw/corrected point estimates (black/red). Collapsing this to a single reported standard deviation, as in a conventional error-bar plot, would hide two things the full distribution makes visible directly. First, \emph{where} a case's point estimate actually falls within its own uncertainty: a case can sit near the edge of its distribution, or comfortably at its center, and only the full cloud shows which. Second, for the fission source specifically (Fig.~\ref{fig:fig5}--\ref{fig:fig5b}), that even the brute-force replica distribution itself --- not just the raw or corrected point estimate --- is systematically offset from zero relative deviation in several cases, rather than straddling it symmetrically; a $\pm2\sigma$ band centered on the point estimate would not reveal this, since it says nothing about where the underlying ensemble itself is centered.
+Rather than collapsing this budget to a single $\pm2\sigma_{\text{tot}}$ number per case, Figure~\ref{fig:fig4} shows the full picture for $k_{\text{eff}}$: every one of the $N=500$ analytical-model realizations (gray) and, since 150 genuinely independent brute-force replicas of the whole database already exist (Sec.~\ref{sec:four_methods}), every one of those true replicas too (blue open circles), alongside the reference case's own $\pm2\sigma_{\text{ref}}$ (pink band) and the raw/corrected point estimates (black/red). Collapsing this to a single reported standard deviation, as in a conventional error-bar plot, would hide \emph{where} a case's point estimate actually falls within its own uncertainty: a case can sit near the edge of its distribution, or comfortably at its center, and only the full cloud shows which.
+
+For the fission source (Figs.~\ref{fig:fig5}--\ref{fig:fig5b}) the same full-distribution logic is applied differently, for two reasons specific to this observable. First, at 127 zones per case the $N=500$ synthetic analytical realizations add visual clutter without adding information beyond what Sec.~\ref{sec:validation} already establishes about that model's accuracy, so only the $N=150$ genuine, independent brute-force replicas (Track A, no resampling assumption at all) are shown, split by flavor: raw in gray, corrected in shades of red. Second, every point --- ensemble and point estimate alike --- is tested directly against the reference case's own $\pm2\sigma_{\text{ref}}$, drawn here as its true, zone-by-zone curve (dashed black lines) rather than folded into a single reported number as in Fig.~\ref{fig:fig4}. A corrected point is recolored gold if and only if it falls inside that band \emph{and} the matching raw point --- same zone, same replica --- was outside it: exactly the population for which the CTCR turned a discrepancy raw could not explain by noise into one it can. Every other corrected point --- already consistent with noise in raw, or still not explained by noise even after correction --- keeps the base red. This isolates the population the correction is meant to act on, rather than diluting the plot with every in-band point regardless of whether raw needed fixing there at all.
 
 \begin{figure}[t]
   \centering
@@ -433,6 +435,23 @@ This systematic offset of the whole replica distribution away from zero is itsel
 
 Where the corrected replica cloud is centered close to zero --- Dirac 300~K, Linear 300--900~K, and most of the cases in Fig.~\ref{fig:fig5b} --- the residual deviation from the reference is statistically indistinguishable from Monte Carlo noise (and the reflector-mismatch bias just described, where present, is small relative to that noise), and no further correction is warranted. Where it is not --- the localized spikes in Dirac 1000~K, 6-assemblies 1000~K, and the Rings cases --- the deviation exceeds what either noise source can account for, and is therefore a genuine, uncorrected bias rather than statistical scatter. Because the database-noise model has itself been validated against brute force (Sec.~\ref{sec:validation}), it is not the plausible origin of these residuals; the most likely cause is the interpolation scheme's finite temperature grid, whose eight-point spacing cannot fully resolve the sharpest gradients. Figure~\ref{fig:hex_map} maps each zone index in Figs.~\ref{fig:fig5}--\ref{fig:fig5b} back to its physical hexagon.
 
+A global summary metric can be misleading about how well the correction is actually doing its job locally. Sec.~\ref{sec:res_raw_vs_corrected} already reported the CTCR's benefit on the two aggregate figures of merit, $k_{\text{eff}}$ and the fission-source RMS: both improve, but a global metric averages over all 127 zones, and so cannot distinguish a case that improves a little everywhere from one that improves dramatically in exactly the zone that matters and not at all elsewhere. Table~\ref{tab:hexcount} makes the zone-by-zone picture concrete: pooling all twelve cases (1524 zone instances), the fraction of zones whose fission-source point estimate is statistically consistent with noise ($|\delta F_i|<2\sigma_{\text{tot}}$) rises from 70--73\% (raw) to 78--82\% (corrected), depending on which of the four $\sigma_{\text{database}}$ models of Sec.~\ref{sec:four_methods} is used to build the band --- a shift observed consistently across all four, so it is not an artifact of which noise model happens to be used to judge it. The ensemble columns of Table~\ref{tab:hexcount} report the same statistic computed per replica and averaged over the $N$ replicas of each model, rather than for the single nominal point alone, and show the same consistent improvement. This distinction matters beyond bookkeeping: for a transient analysis, where the quantity of interest is often a single, localized hot spot --- the most critical point of the system --- rather than any core-averaged figure, it is representativeness at that one zone, not how good the global $k_{\text{eff}}$ or the RMS looks on average, that determines whether the interpolated model can be trusted where an error would matter most.
+
+\begin{table}[h]
+\centering
+\caption{Fraction of Zones (1524 = 127 zones $\times$ 12 cases) Statistically Consistent with Noise ($|\delta F_i|<2\sigma_{\text{tot}}$), by $\sigma_{\text{database}}$ Model}
+\label{tab:hexcount}
+\begin{tabular}{lcccc}
+\hline
+ & \multicolumn{2}{c}{Point estimate} & \multicolumn{2}{c}{Ensemble (per-replica average)} \\
+$\sigma_{\text{database}}$ model & raw & corrected & raw & corrected \\ \hline
+(i) Uncorrelated   & 73.0\% & 81.6\% & 65.0\% & 70.7\% \\
+(ii) Analytical    & 69.7\% & 77.5\% & 64.5\% & 72.1\% \\
+(iii) Measured     & 70.9\% & 78.7\% & 63.5\% & 69.2\% \\
+(iv) Brute force   & 72.0\% & 80.6\% & 71.3\% & 80.3\% \\ \hline
+\end{tabular}
+\end{table}
+
 \begin{figure}[t]
   \centering
   \includegraphics[width=110mm]{figures/hex_index_map.png}
@@ -442,14 +461,14 @@ Where the corrected replica cloud is centered close to zero --- Dirac 300~K, Lin
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=150mm]{figures/fig5a_fission_source_ensemble_vs_truth.png}
-  \caption{Fission-source relative deviation from the reference, zone by zone: every analytical-model realization (gray, $N=500$) and every true brute-force replica (blue, $N=150$), raw (black) and corrected (red) point estimates, with the reference case's own $\pm2\sigma_{\text{ref}}$ (pink band); test cases 1--6.}
+  \includegraphics[width=150mm]{figures/fig5a_fission_source_brute_force_rescue.png}
+  \caption{Fission-source relative deviation from the reference, zone by zone, true brute-force replicas only (Track A, $N=150$, no resampling assumption): raw ensemble (gray) and corrected ensemble (red, or gold where ``rescued''), together with the raw (black, filled) and corrected (dark red, or gold where rescued) point estimates, and the reference case's own $\pm2\sigma_{\text{ref}}$ drawn as its true zone-by-zone curve (dashed black lines) rather than a single flattened value. A corrected point --- ensemble replica or point estimate --- is colored gold precisely when it falls inside this band \emph{and} the matching raw point (same zone, same replica) was outside it, i.e., where the correction turned a discrepancy raw could not explain by noise into one it can; every other corrected point keeps the base red. Test cases 1--6.}
   \label{fig:fig5}
 \end{figure}
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=150mm]{figures/fig5b_fission_source_ensemble_vs_truth.png}
+  \includegraphics[width=150mm]{figures/fig5b_fission_source_brute_force_rescue.png}
   \caption{As Fig.~\ref{fig:fig5}, for test cases 7--12.}
   \label{fig:fig5b}
 \end{figure}
