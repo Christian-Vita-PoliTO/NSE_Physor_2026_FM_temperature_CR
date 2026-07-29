@@ -8,6 +8,7 @@
 % one, and does the correction ratio's benefit survive it?
 \documentclass{style/nseJournal}
 \usepackage{amssymb}
+\usepackage{placeins}
 
 \begin{document}
 
@@ -422,7 +423,7 @@ Combining $\sigma_{\text{ref}}$ (Sec.~\ref{sec:res_reference}) with $\sigma_{\te
 
 Rather than collapsing this budget to a single $\pm2\sigma_{\text{tot}}$ number per case, Figure~\ref{fig:fig4} shows the full picture for $k_{\text{eff}}$: every one of the $N=500$ analytical-model realizations (gray) and, since 150 genuinely independent brute-force replicas of the whole database already exist (Sec.~\ref{sec:four_methods}), every one of those true replicas too (blue open circles), alongside the reference case's own $\pm2\sigma_{\text{ref}}$ (pink band) and the raw/corrected point estimates (black/red). Collapsing this to a single reported standard deviation, as in a conventional error-bar plot, would hide \emph{where} a case's point estimate actually falls within its own uncertainty: a case can sit near the edge of its distribution, or comfortably at its center, and only the full cloud shows which.
 
-For the fission source (Figs.~\ref{fig:fig5}--\ref{fig:fig5b}) the same full-distribution logic is applied differently, for two reasons specific to this observable. First, at 127 zones per case the $N=500$ synthetic analytical realizations add visual clutter without adding information beyond what Sec.~\ref{sec:validation} already establishes about that model's accuracy, so only the $N=150$ genuine, independent brute-force replicas (Track A, no resampling assumption at all) are shown, split by flavor: raw in gray, corrected in shades of red. Second, every point --- ensemble and point estimate alike --- is tested directly against the reference case's own $\pm2\sigma_{\text{ref}}$, drawn here as its true, zone-by-zone curve (dashed black lines) rather than folded into a single reported number as in Fig.~\ref{fig:fig4}. A corrected point is recolored gold if and only if it falls inside that band \emph{and} the matching raw point --- same zone, same replica --- was outside it: exactly the population for which the CTCR turned a discrepancy raw could not explain by noise into one it can. Every other corrected point --- already consistent with noise in raw, or still not explained by noise even after correction --- keeps the base red. This isolates the population the correction is meant to act on, rather than diluting the plot with every in-band point regardless of whether raw needed fixing there at all.
+For the fission source (Fig.~\ref{fig:fig5}) the same full-distribution logic is applied differently, for two reasons specific to this observable. First, at 127 zones per case the $N=500$ synthetic analytical realizations add visual clutter without adding information beyond what Sec.~\ref{sec:validation} already establishes about that model's accuracy, so only the $N=150$ genuine, independent brute-force replicas (Track A, no resampling assumption at all) are shown, split by flavor: raw in gray, corrected in shades of red. Second, every point --- ensemble and point estimate alike --- is tested directly against the reference case's own $\pm2\sigma_{\text{ref}}$, drawn here as its true, zone-by-zone curve (dashed black lines) rather than folded into a single reported number as in Fig.~\ref{fig:fig4}. A corrected point is recolored gold if and only if it falls inside that band \emph{and} the matching raw point --- same zone, same replica --- was outside it: exactly the population for which the CTCR turned a discrepancy raw could not explain by noise into one it can. Every other corrected point --- already consistent with noise in raw, or still not explained by noise even after correction --- keeps the base red. This isolates the population the correction is meant to act on, rather than diluting the plot with every in-band point regardless of whether raw needed fixing there at all. Fig.~\ref{fig:fig5} shows six representative cases, each row pairing one where the correction rescues a large fraction of zones with one where it does almost nothing, so the contrast is direct; the full twelve cases in this same format are given in the Appendix (Figs.~\ref{fig:fig5_appendix_a}--\ref{fig:fig5_appendix_b}).
 
 \begin{figure}[t]
   \centering
@@ -433,7 +434,7 @@ For the fission source (Figs.~\ref{fig:fig5}--\ref{fig:fig5b}) the same full-dis
 
 This systematic offset of the whole replica distribution away from zero is itself informative: it points to a mismatch between the database and some of the test cases that no amount of resampling the database can correct, because it is not database noise at all. The database is tallied with the radial reflector at the same uniform temperature as the rest of the core at each of its eight reference points, whereas several test cases instead fix the reflector at a constant 300~K regardless of the in-core field being tested. Where the in-core temperature departs from 300~K, this creates a sharp, systematic core-to-reflector gradient that is simply absent from the database's own construction, and every replica of that database --- brute-force or synthetic --- inherits the same mismatch, hence the same offset. This is a bias in the comparison's reference frame, not a statistical fluctuation, and no amount of resampling removes it.
 
-Where the corrected replica cloud is centered close to zero --- Dirac 300~K, Linear 300--900~K, and most of the cases in Fig.~\ref{fig:fig5b} --- the residual deviation from the reference is statistically indistinguishable from Monte Carlo noise (and the reflector-mismatch bias just described, where present, is small relative to that noise), and no further correction is warranted. Where it is not --- the localized spikes in Dirac 1000~K, 6-assemblies 1000~K, and the Rings cases --- the deviation exceeds what either noise source can account for, and is therefore a genuine, uncorrected bias rather than statistical scatter. Because the database-noise model has itself been validated against brute force (Sec.~\ref{sec:validation}), it is not the plausible origin of these residuals; the most likely cause is the interpolation scheme's finite temperature grid, whose eight-point spacing cannot fully resolve the sharpest gradients. Figure~\ref{fig:hex_map} maps each zone index in Figs.~\ref{fig:fig5}--\ref{fig:fig5b} back to its physical hexagon.
+Where the corrected replica cloud is centered close to zero --- Dirac 300~K, Linear 300--900~K, and most of the smoother power-shaped profiles (Appendix, Figs.~\ref{fig:fig5_appendix_a}--\ref{fig:fig5_appendix_b}) --- the residual deviation from the reference is statistically indistinguishable from Monte Carlo noise (and the reflector-mismatch bias just described, where present, is small relative to that noise), and no further correction is warranted. Where it is not --- the localized spikes in Dirac 1000~K, 6-assemblies 1000~K, and the Rings cases --- the deviation exceeds what either noise source can account for, and is therefore a genuine, uncorrected bias rather than statistical scatter. Because the database-noise model has itself been validated against brute force (Sec.~\ref{sec:validation}), it is not the plausible origin of these residuals; the most likely cause is the interpolation scheme's finite temperature grid, whose eight-point spacing cannot fully resolve the sharpest gradients. Figure~\ref{fig:hex_map} maps each zone index in Fig.~\ref{fig:fig5} and Figs.~\ref{fig:fig5_appendix_a}--\ref{fig:fig5_appendix_b} back to its physical hexagon.
 
 A global summary metric can be misleading about how well the correction is actually doing its job locally. Sec.~\ref{sec:res_raw_vs_corrected} already reported the CTCR's benefit on the two aggregate figures of merit, $k_{\text{eff}}$ and the fission-source RMS: both improve, but a global metric averages over all 127 zones, and so cannot distinguish a case that improves a little everywhere from one that improves dramatically in exactly the zone that matters and not at all elsewhere. Table~\ref{tab:hexcount} makes the zone-by-zone picture concrete on a per-case basis: for each of the twelve cases, the number of zones (out of 127) whose fission-source point estimate is statistically consistent with noise ($|\delta F_i|<2\sigma_{\text{tot}}$), raw versus corrected, under each of the four $\sigma_{\text{database}}$ models of Sec.~\ref{sec:four_methods}. The pattern mirrors the point-estimate result of Table~\ref{tab:reference_results}, but is sharper here: for the Rings cases the corrected count roughly doubles (e.g., Rings 1000~K rises from 36--41 to 77--88 zones out of 127, consistently across all four models), while for the smoothest profiles the shift is small or even mildly unfavorable (Dirac 300~K, Power Tmin650 DT100/DT200). This distinction matters beyond bookkeeping: for a transient analysis, where the quantity of interest is often a single, localized hot spot --- the most critical point of the system --- rather than any core-averaged figure, it is representativeness at that one zone, not how good the global $k_{\text{eff}}$ or the RMS looks on average, that determines whether the interpolated model can be trusted where an error would matter most.
 
@@ -464,22 +465,15 @@ Power inverse Tmin650    & 120 & 119 & 114 & 115 & 117 & 116 & 117 & 116 \\ \hli
 \begin{figure}[t]
   \centering
   \includegraphics[width=110mm]{figures/hex_index_map.png}
-  \caption{Hexagon-index map (1--127) referenced by the zone-index axis of Figs.~\ref{fig:fig5}--\ref{fig:fig5b}; hexagon 64 is the central assembly $C$ of the Dirac calibration cases (Sec.~\ref{sec:pipeline}).}
+  \caption{Hexagon-index map (1--127) referenced by the zone-index axis of Fig.~\ref{fig:fig5} and Figs.~\ref{fig:fig5_appendix_a}--\ref{fig:fig5_appendix_b}; hexagon 64 is the central assembly $C$ of the Dirac calibration cases (Sec.~\ref{sec:pipeline}).}
   \label{fig:hex_map}
 \end{figure}
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=150mm]{figures/fig5a_fission_source_brute_force_rescue.png}
-  \caption{Fission-source relative deviation from the reference, zone by zone, true brute-force replicas only (Track A, $N=150$, no resampling assumption): raw ensemble (gray) and corrected ensemble (red, or gold where ``rescued''), together with the raw (black, filled) and corrected (dark red, or gold where rescued) point estimates, and the reference case's own $\pm2\sigma_{\text{ref}}$ drawn as its true zone-by-zone curve (dashed black lines) rather than a single flattened value. A corrected point --- ensemble replica or point estimate --- is colored gold precisely when it falls inside this band \emph{and} the matching raw point (same zone, same replica) was outside it, i.e., where the correction turned a discrepancy raw could not explain by noise into one it can; every other corrected point keeps the base red. Test cases 1--6.}
+  \includegraphics[width=110mm]{figures/fig5_fission_source_selected.png}
+  \caption{Fission-source relative deviation from the reference, zone by zone, true brute-force replicas only (Track A, $N=150$, no resampling assumption): raw ensemble (gray) and corrected ensemble (red, or gold where ``rescued''), together with the raw (black, filled) and corrected (dark red, or gold where rescued) point estimates, and the reference case's own $\pm2\sigma_{\text{ref}}$ drawn as its true zone-by-zone curve (dashed black lines) rather than a single flattened value. A corrected point --- ensemble replica or point estimate --- is colored gold precisely when it falls inside this band \emph{and} the matching raw point (same zone, same replica) was outside it, i.e., where the correction turned a discrepancy raw could not explain by noise into one it can; every other corrected point keeps the base red. Six representative cases, each row pairing a large rescued fraction (left) against a nearly unaffected case (right): Rings 1000~K / Power Tmin650 DT100, Rings 600/1000~K / Power Tmin650 DT200, 6~assemblies 1000~K / Power inverse Tmin650.}
   \label{fig:fig5}
-\end{figure}
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=150mm]{figures/fig5b_fission_source_brute_force_rescue.png}
-  \caption{As Fig.~\ref{fig:fig5}, for test cases 7--12.}
-  \label{fig:fig5b}
 \end{figure}
 
 
@@ -552,6 +546,7 @@ Power inverse Tmin650    & 120 & 119 & 114 & 115 & 117 & 116 & 117 & 116 \\ \hli
 %   \label{fig:fig5b}
 % \end{figure}
 
+\FloatBarrier
 \section{Conclusions}
 \label{sec:conclusions}
 
@@ -561,6 +556,25 @@ The interpolated (and CTCR-corrected) fission matrix inherits statistical noise 
 
 The authors would like to acknowledge that the research activity of the PhD project is sponsored by the Italian funding plan ``Piano Nazionale Ripresa e Resilienza'' (PNRR) and by Westinghouse Electric Company to support the development of methods for advanced reactors. This work has been carried over during the author's internship period at Westinghouse Electric Company. The methodology developed is an extension of the studies previously made during the author's internship activity at Argonne National Laboratory under the supervision and support of Dr.\ Nicolas Stauff and his research team.
 
+\section*{Appendix: Fission-Source Deviation, All Twelve Cases}
+
+Fig.~\ref{fig:fig5} in the main text shows six representative cases, paired for contrast. For completeness, Figs.~\ref{fig:fig5_appendix_a}--\ref{fig:fig5_appendix_b} give the same plot, in the same style, for all twelve.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=150mm]{figures/fig5a_fission_source_brute_force_rescue.png}
+  \caption{Fission-source relative deviation from the reference, zone by zone, true brute-force replicas only (Track A, $N=150$, no resampling assumption): raw ensemble (gray) and corrected ensemble (red, or gold where ``rescued''), together with the raw (black, filled) and corrected (dark red, or gold where rescued) point estimates, and the reference case's own $\pm2\sigma_{\text{ref}}$ drawn as its true zone-by-zone curve (dashed black lines) rather than a single flattened value. A corrected point --- ensemble replica or point estimate --- is colored gold precisely when it falls inside this band \emph{and} the matching raw point (same zone, same replica) was outside it, i.e., where the correction turned a discrepancy raw could not explain by noise into one it can; every other corrected point keeps the base red. Test cases 1--6.}
+  \label{fig:fig5_appendix_a}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=150mm]{figures/fig5b_fission_source_brute_force_rescue.png}
+  \caption{As Fig.~\ref{fig:fig5_appendix_a}, for test cases 7--12.}
+  \label{fig:fig5_appendix_b}
+\end{figure}
+
+\FloatBarrier
 \pagebreak
 \bibliographystyle{style/ans_js}
 \bibliography{bibliography}
