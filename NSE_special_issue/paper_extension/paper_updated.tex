@@ -433,6 +433,8 @@ This systematic offset of the whole replica distribution away from zero is itsel
 
 Where the corrected replica cloud is centered close to zero --- Dirac 300~K, Linear 300--900~K, and most of the cases in Fig.~\ref{fig:fig5b} --- the residual deviation from the reference is statistically indistinguishable from Monte Carlo noise (and the reflector-mismatch bias just described, where present, is small relative to that noise), and no further correction is warranted. Where it is not --- the localized spikes in Dirac 1000~K, 6-assemblies 1000~K, and the Rings cases --- the deviation exceeds what either noise source can account for, and is therefore a genuine, uncorrected bias rather than statistical scatter. Because the database-noise model has itself been validated against brute force (Sec.~\ref{sec:validation}), it is not the plausible origin of these residuals; the most likely cause is the interpolation scheme's finite temperature grid, whose eight-point spacing cannot fully resolve the sharpest gradients. Figure~\ref{fig:hex_map} maps each zone index in Figs.~\ref{fig:fig5}--\ref{fig:fig5b} back to its physical hexagon.
 
+
+
 \begin{figure}[t]
   \centering
   \includegraphics[width=110mm]{figures/hex_index_map.png}
@@ -443,7 +445,7 @@ Where the corrected replica cloud is centered close to zero --- Dirac 300~K, Lin
 \begin{figure}[t]
   \centering
   \includegraphics[width=150mm]{figures/fig5a_fission_source_ensemble_vs_truth.png}
-  \caption{Fission-source relative deviation from the reference, zone by zone: every analytical-model realization (gray, $N=500$) and every true brute-force replica (blue, $N=150$), raw (black) and corrected (red) point estimates, with the reference case's own $\pm2\sigma_{\text{ref}}$ (pink band); test cases 1--6.}
+  \caption{Fission ource relative deviation from the reference, zone by zone: every analytical-model realization (gray, $N=500$) and every true brute-force replica (blue, $N=150$), raw (black) and corrected (red) point estimates, with the reference case's own $\pm2\sigma_{\text{ref}}$ (pink band); test cases 1--6.}
   \label{fig:fig5}
 \end{figure}
 
