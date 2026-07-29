@@ -435,20 +435,29 @@ This systematic offset of the whole replica distribution away from zero is itsel
 
 Where the corrected replica cloud is centered close to zero --- Dirac 300~K, Linear 300--900~K, and most of the cases in Fig.~\ref{fig:fig5b} --- the residual deviation from the reference is statistically indistinguishable from Monte Carlo noise (and the reflector-mismatch bias just described, where present, is small relative to that noise), and no further correction is warranted. Where it is not --- the localized spikes in Dirac 1000~K, 6-assemblies 1000~K, and the Rings cases --- the deviation exceeds what either noise source can account for, and is therefore a genuine, uncorrected bias rather than statistical scatter. Because the database-noise model has itself been validated against brute force (Sec.~\ref{sec:validation}), it is not the plausible origin of these residuals; the most likely cause is the interpolation scheme's finite temperature grid, whose eight-point spacing cannot fully resolve the sharpest gradients. Figure~\ref{fig:hex_map} maps each zone index in Figs.~\ref{fig:fig5}--\ref{fig:fig5b} back to its physical hexagon.
 
-A global summary metric can be misleading about how well the correction is actually doing its job locally. Sec.~\ref{sec:res_raw_vs_corrected} already reported the CTCR's benefit on the two aggregate figures of merit, $k_{\text{eff}}$ and the fission-source RMS: both improve, but a global metric averages over all 127 zones, and so cannot distinguish a case that improves a little everywhere from one that improves dramatically in exactly the zone that matters and not at all elsewhere. Table~\ref{tab:hexcount} makes the zone-by-zone picture concrete: pooling all twelve cases (1524 zone instances), the fraction of zones whose fission-source point estimate is statistically consistent with noise ($|\delta F_i|<2\sigma_{\text{tot}}$) rises from 70--73\% (raw) to 78--82\% (corrected), depending on which of the four $\sigma_{\text{database}}$ models of Sec.~\ref{sec:four_methods} is used to build the band --- a shift observed consistently across all four, so it is not an artifact of which noise model happens to be used to judge it. The ensemble columns of Table~\ref{tab:hexcount} report the same statistic computed per replica and averaged over the $N$ replicas of each model, rather than for the single nominal point alone, and show the same consistent improvement. This distinction matters beyond bookkeeping: for a transient analysis, where the quantity of interest is often a single, localized hot spot --- the most critical point of the system --- rather than any core-averaged figure, it is representativeness at that one zone, not how good the global $k_{\text{eff}}$ or the RMS looks on average, that determines whether the interpolated model can be trusted where an error would matter most.
+A global summary metric can be misleading about how well the correction is actually doing its job locally. Sec.~\ref{sec:res_raw_vs_corrected} already reported the CTCR's benefit on the two aggregate figures of merit, $k_{\text{eff}}$ and the fission-source RMS: both improve, but a global metric averages over all 127 zones, and so cannot distinguish a case that improves a little everywhere from one that improves dramatically in exactly the zone that matters and not at all elsewhere. Table~\ref{tab:hexcount} makes the zone-by-zone picture concrete on a per-case basis: for each of the twelve cases, the number of zones (out of 127) whose fission-source point estimate is statistically consistent with noise ($|\delta F_i|<2\sigma_{\text{tot}}$), raw versus corrected, under each of the four $\sigma_{\text{database}}$ models of Sec.~\ref{sec:four_methods}. The pattern mirrors the point-estimate result of Table~\ref{tab:reference_results}, but is sharper here: for the Rings cases the corrected count roughly doubles (e.g., Rings 1000~K rises from 36--41 to 77--88 zones out of 127, consistently across all four models), while for the smoothest profiles the shift is small or even mildly unfavorable (Dirac 300~K, Power Tmin650 DT100/DT200). This distinction matters beyond bookkeeping: for a transient analysis, where the quantity of interest is often a single, localized hot spot --- the most critical point of the system --- rather than any core-averaged figure, it is representativeness at that one zone, not how good the global $k_{\text{eff}}$ or the RMS looks on average, that determines whether the interpolated model can be trusted where an error would matter most.
 
 \begin{table}[h]
 \centering
-\caption{Fraction of Zones (1524 = 127 zones $\times$ 12 cases) Statistically Consistent with Noise ($|\delta F_i|<2\sigma_{\text{tot}}$), by $\sigma_{\text{database}}$ Model}
+\caption{Number of Zones (out of 127) Statistically Consistent with Noise ($|\delta F_i|<2\sigma_{\text{tot}}$), Raw (r) vs.\ Corrected (c), by Case and $\sigma_{\text{database}}$ Model}
 \label{tab:hexcount}
-\begin{tabular}{lcccc}
+\footnotesize
+\begin{tabular}{lcccccccc}
 \hline
- & \multicolumn{2}{c}{Point estimate} & \multicolumn{2}{c}{Ensemble (per-replica average)} \\
-$\sigma_{\text{database}}$ model & raw & corrected & raw & corrected \\ \hline
-(i) Uncorrelated   & 73.0\% & 81.6\% & 65.0\% & 70.7\% \\
-(ii) Analytical    & 69.7\% & 77.5\% & 64.5\% & 72.1\% \\
-(iii) Measured     & 70.9\% & 78.7\% & 63.5\% & 69.2\% \\
-(iv) Brute force   & 72.0\% & 80.6\% & 71.3\% & 80.3\% \\ \hline
+ & \multicolumn{2}{c}{(i) Uncorr.} & \multicolumn{2}{c}{(ii) Analyt.} & \multicolumn{2}{c}{(iii) Meas.} & \multicolumn{2}{c}{(iv) Brute force} \\
+Case & r & c & r & c & r & c & r & c \\ \hline
+Dirac 1000~K            & 116 & 118 & 110 & 109 & 112 & 112 & 113 & 115 \\
+Dirac 300~K              & 110 & 106 & 103 & 100 & 105 & 100 & 107 & 105 \\
+6 assemblies 1000~K      & 103 & 114 & 102 & 103 & 103 & 106 & 103 & 112 \\
+Rings 1000~K             &  41 &  84 &  36 &  77 &  37 &  79 &  40 &  88 \\
+Rings 600/1000~K         &  55 &  87 &  51 &  85 &  55 &  85 &  55 &  88 \\
+Linear 300--900~K        &  66 &  90 &  62 &  82 &  65 &  88 &  66 &  89 \\
+Power shape 300--1000~K  &  61 &  77 &  59 &  76 &  60 &  76 &  60 &  76 \\
+Power Tmin650 DT100      & 118 & 116 & 115 & 114 & 116 & 114 & 117 & 115 \\
+Power Tmin650 DT200      & 117 & 119 & 113 & 113 & 114 & 114 & 115 & 115 \\
+Power Tmin650 DT300      &  97 & 104 &  96 & 101 &  93 & 102 &  97 & 103 \\
+Power spike Tmin350      & 109 & 109 & 101 & 106 & 103 & 107 & 107 & 107 \\
+Power inverse Tmin650    & 120 & 119 & 114 & 115 & 117 & 116 & 117 & 116 \\ \hline
 \end{tabular}
 \end{table}
 
