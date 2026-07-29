@@ -38,9 +38,7 @@
 \titlePage
 
 \begin{abstract}
-The fission matrix (FM) method enables whole-core reactor transport calculations within seconds by interpolating a precalculated database of Monte Carlo (MC)--tallied coefficients across temperature, instead of running a direct MC calculation for every configuration of interest. Interpolation implicitly assumes each coefficient depends only on the local temperature of the two cells it couples, an assumption that breaks down under large, spatially sharp temperature gradients; a Core Temperature Correction Ratio (CTCR) was previously introduced to compensate for this. A point-estimate improvement alone, however, cannot distinguish a real, uncorrected bias from the statistical noise inherent to the underlying MC calculations. Doing so requires an uncertainty budget with two components: the reference case's own directly-reported MC statistics, and the uncertainty of the \emph{interpolated} matrix itself --- a new object, assembled from the database's own finite-statistics matrices, that carries no MC replicas of its own. We construct the latter by resampling the database and recomputing the interpolated (and corrected) result many times, comparing an uncorrelated baseline, a zero-replica analytical model built from the branching structure of the fission process, a measured-correlation model, and a genuine brute-force reconstruction from 150 independent replicas. Validated against brute force across 12 test cases, the analytical model reproduces the true $k_{\text{eff}}$ uncertainty to within a mean absolute deviation of 4.6\%, matching or exceeding the two more expensive alternatives, while requiring no MC replicas beyond the nominal database already needed for interpolation. Combining both uncertainty sources, the correction ratio's benefit is markedly uneven: for the sharpest, most spatially localized temperature fields it eliminates most of the point-estimate $k_{\text{eff}}$ discrepancy
-% --- in the most extreme case, from 57.4 to 0.7~pcm --- 
-while for smoother, more gradual gradients the improvement is negligible or occasionally unfavorable. The local fission-source error follows the same pattern, improving markedly wherever a strong, spatially localized temperature gradient is present; where the correction succeeds, the residual discrepancy is generally consistent with the combined statistical noise of the reference case and the interpolated database.
+The fission matrix (FM) method enables whole-core reactor transport calculations within seconds by interpolating a precalculated database of Monte Carlo (MC)--tallied coefficients across temperature, instead of running a direct MC calculation for every configuration of interest. Interpolation implicitly assumes each coefficient depends only on the local temperature of cell where fission occurs, an assumption that breaks down under large, spatially sharp temperature gradients. In this work a Core Temperature Correction Ratio (CTCR) is introduced to compensate this effect. A point-estimate improvement alone, however, cannot distinguish a real, uncorrected bias from the statistical noise inherent to the underlying MC calculations. Doing so requires an uncertainty budget with two components: the reference case's own directly-reported MC statistics, and the uncertainty of the \emph{interpolated} matrix itself: a new object, assembled from the database's own finite-statistics matrices, that carries no MC replicas of its own. We construct the latter by resampling the database and recomputing the interpolated (and corrected) result many times, comparing an uncorrelated baseline, a innovative derivation of a zero-replica analytical model, a measured-correlation model, and a genuine brute-force reconstruction from 150 independent replicas. Validated against brute force across 12 test cases, the analytical model reproduces the true $k_{\text{eff}}$ uncertainty to within a mean absolute deviation of 4.6\%, matching or exceeding the two more expensive alternatives, while requiring no MC replicas beyond the nominal database already needed for interpolation. Combining both uncertainty sources, The benefits of the CTCR are evident in almost all cases. In general, it removes most of the point-estimate $k_{\text(eff)}$ discrepancy for sharply varying, highly localized temperature fields, whereas the improvement becomes less pronounced (and less necessary) for smoother, more gradual temperature distributions. The local fission-source error follows the same pattern, improving markedly wherever a strong, spatially localized temperature gradient is present; where the correction succeeds, the residual discrepancy is generally consistent with the combined statistical noise of the reference case and the interpolated database.
 \end{abstract}
 
 \section{Introduction}
@@ -86,13 +84,13 @@ The fission matrix (FM) method~\cite{CarneyANE2014} recasts the $k$-eigenvalue t
 where $S_j$ is the fission-neutron source integrated over region $j$, and the coefficient $a_{ij}$ is the expected number of fission neutrons born in region $i$ per fission neutron emitted in region $j$. The $N\times N$ array of these coefficients is the fission matrix $\mathbf{A}$: its dominant eigenvalue is $k_{\text{eff}}$ and the associated eigenvector is the regionwise fission-source distribution~\cite{CarneyANE2014}. 
 % Throughout this work the column index $j$ labels the \emph{source} region and the row index $i$ the \emph{destination} region --- a convention that underlies the correlation structure derived in Sec.~\ref{sec:analytical_derivation}.
 
-Because each coefficient is defined per emitted source neutron, the fission multiplicity is already embedded in it: a source neutron that induces a fission contributes $\bar\nu$ neutrons to the destination region, not one. The matrix is nonsymmetric, so its eigenvalues and eigenvectors are in general complex, although the fundamental mode is strictly real and non-negative~\cite{CarneyANE2014}. A key practical feature of the method is that the coefficients can be accumulated at negligible additional cost during an ordinary Monte Carlo criticality calculation, by tallying, over the active cycles, the region of birth of each fission neutron against the region of birth of its parent. In this work the full $127\times127$ fission matrix (one region per fuel assembly) is obtained in this way from a single whole-core Serpent calculation, so that every coefficient reflects the complete core environment, radial reflector and inter-assembly heterogeneity included, with no auxiliary fixed-source calculation required.
+Because each coefficient is defined per emitted source neutron, the fission multiplicity is already embedded in it: a source neutron that induces a fission contributes $\bar\nu$ neutrons to the destination region, not one. The matrix is nonsymmetric, so its eigenvalues and eigenvectors are in general complex, although the fundamental mode is strictly real and non-negative~\cite{CarneyANE2014}. A key practical feature of the method is that the coefficients can be accumulated at negligible additional cost during an ordinary Monte Carlo criticality calculation, by tallying, over the active cycles, the region of birth of each fission neutron against the region of birth of its parent. In this work the full $127\times127$ fission matrix (one region per fuel assembly) is obtained in this way from a single whole-core Serpent calculation, so that every coefficient reflects the complete core environment.
 
 
 \subsection{Database, Interpolation, and the Correction Ratio}
 \label{sec:pipeline}
 
-Rather than tallying a fission matrix directly for every temperature field of interest, the method precalculates a database of fission matrices at a set of uniform reference temperatures and interpolates within it. Here the database stores the coefficients $a_{ij}$ at eight uniform temperatures spanning 300--1000~K in 100~K steps; for an arbitrary temperature field, each coefficient is first obtained by piecewise-linear interpolation between the two bracketing database temperatures, as described in Eq.~\ref{eqn:interp}
+Rather than tallying a fission matrix directly for every temperature field of interest, the method precalculates a database of fission matrices at a set of uniform reference temperatures and interpolates within it. To keep the methodology practical and computationally attractive, it is important to maintain good accuracy while relying on a compact and simply defined database. For this reason, the database considered here contains the coefficients $a_{ij}$ at only eight uniform temperatures spanning 300--1000~K in 100~K increments. For an arbitrary temperature field, each coefficient is first obtained by piecewise-linear interpolation between the two bracketing database temperatures, as described in Eq.~\ref{eqn:interp}.
 
 \begin{equation}
   a_{ij}(T_i) = a_{ij}^{-} + \frac{T_i - T_i^{-}}{T_i^{+} - T_i^{-}} \left( a_{ij}^{+} - a_{ij}^{-} \right),
@@ -127,7 +125,7 @@ For an arbitrary temperature field, the correction applied to a generic interpol
   \qquad \Delta T_{kl} = T_k - T_l,
   \label{eqn:ctcr}
 \end{equation}
-where $\Delta T_{\text{dirac}} = 700$~K is the calibration temperature span common to both Dirac cases, and $r^{+}(d)$ is used when $\Delta T_{kl}>0$ (cell $k$ hotter than $l$) while $r^{-}(d)$ is used when $\Delta T_{kl}<0$ --- i.e., the calibration case matching the \emph{sign} of the local temperature difference, evaluated at its own geometric distance $d$. The corrected FM is renormalized column-wise so that each cell's total fission source contribution is preserved, following the same convention as Ref.~\cite{VitaPHYSOR2026}.
+where $\Delta T_{\text{dirac}} = 700$~K is the calibration temperature span common to both Dirac cases, and $r^{+}(d)$ is used when $\Delta T_{kl}>0$ (cell $k$ hotter than $l$) while $r^{-}(d)$ is used when $\Delta T_{kl}<0$ --- i.e., the calibration case matching the \emph{sign} of the local temperature difference, evaluated at its own geometric distance $d$.
 
 In this work the two variants compared are referred to as \emph{raw} (interpolation only) and \emph{corrected} (interpolation plus CTCR).
 
@@ -192,7 +190,7 @@ where $\mathbf{D}$ is the diagonal matrix of the per-coefficient standard deviat
 
 Coefficients tallied within a single Monte Carlo criticality calculation are not, in general, statistically independent, because the number of neutron histories simulated per active cycle is fixed, a fact responsible for well-documented biases and correlations in cycle-based Monte Carlo estimators~\cite{BrissendenGarlick1986}. For two FM coefficients sharing the same source column $j$ (i.e., $a_{ij}$ and $a_{lj}$, $i\neq l$), this mechanism can be made concrete and, unlike the generic statement above, turned into a closed-form prediction.
 
-At the start of a cycle, the number of source neutrons born in column $j$, $N_j$, is fixed (inherited from the previous cycle's fission bank). Each of these $N_j$ histories picks, independently of the others, exactly one outcome: it causes fission in some destination cell $i$ with probability $\pi_i$ (the same probability regardless of which of the $N_j$ histories is considered, since they are all born under identical conditions in column $j$), or it causes no fission at all, with the remaining probability. If it does cause fission, all $\bar\nu$ secondaries are born together at that one destination --- they are not routed independently, one at a time, to possibly different cells. Writing the contribution of history $s$ to destination $i$ as $X_s^{(i)} = \bar\nu\,I_s(i)$, where $I_s(i)$ is $1$ if history $s$ fissions in $i$ and $0$ otherwise, the retained coefficient is the per-source-neutron average
+At the start of a cycle, the number of source neutrons born in column $j$, $N_j$, is fixed (inherited from the previous cycle's fission bank). Each of these $N_j$ histories picks, independently of the others, exactly one outcome: it causes fission in some destination cell $i$ with probability $\pi_i$ (the same probability regardless of which of the $N_j$ histories is considered, since they are all born under identical conditions in column $j$), or it causes no fission at all, with the remaining probability. If it does cause fission, all $\bar\nu$ secondaries are born together at that one destination. Writing the contribution of history $s$ to destination $i$ as $X_s^{(i)} = \bar\nu\,I_s(i)$, where $I_s(i)$ is $1$ if history $s$ fissions in $i$ and $0$ otherwise, the retained coefficient is the per-source-neutron average
 \begin{equation}
   a_{ij} = \frac{1}{N_j}\sum_{s=1}^{N_j} X_s^{(i)} .
   \label{eqn:aij_def}
@@ -204,7 +202,7 @@ A single history cannot fission in two distinct destinations at once, so $I_s(i)
   \operatorname{Cov}\left(X_s^{(i)},X_s^{(l)}\right) = \bar\nu^2\left[\underbrace{E\big(I_s(i)I_s(l)\big)}_{=\,0} - \pi_i\pi_l\right] = -\bar\nu^2\,\pi_i\pi_l ,
   \label{eqn:single_history}
 \end{equation}
-and summing $N_j$ independent, identically distributed histories and dividing by $N_j$ as in Eq.~(\ref{eqn:aij_def}),
+and summing $N_j$ independent, identically distributed histories (thus summing over $s$) and dividing by $N_j$ as in Eq.~(\ref{eqn:aij_def}),
 \begin{equation}
   \operatorname{Var}(a_{ij}) = \frac{\bar\nu^2\,\pi_i(1-\pi_i)}{N_j}, \qquad
   \operatorname{Cov}(a_{ij},a_{lj}) = -\frac{\bar\nu^2\,\pi_i\pi_l}{N_j}, \qquad i\neq l .
@@ -278,12 +276,18 @@ Two plain metrics are used throughout, deliberately without a covariance-weighte
   z = \frac{\Delta k_{\text{eff}}}{\sigma_{\text{tot}}} ;
   \label{eqn:metrics_keff}
 \end{equation}
-for the fission source $F$ (normalized to unit sum over the 127 zones), the per-zone relative deviation and its RMS summary,
+For the fission source $F$ (normalized to unit sum over the 127 zones), the local relative deviation in each zone is defined as
 \begin{equation}
-  \delta F_i = \frac{F_i^{\text{interp}} - F_i^{\text{ref}}}{F_i^{\text{ref}}}\times 100\%, \qquad
-  \mathrm{RMS} = \sqrt{\left\langle \delta F_i^2 \right\rangle_i} .
+  \delta F_i = \frac{F_i^{\text{interp}} - F_i^{\text{ref}}}{F_i^{\text{ref}}}\times 100\%,
+  \label{eqn:metrics_fs_delta}
+\end{equation}
+and the overall discrepancy between the interpolated and reference source distributions is summarized by the root-mean-square (RMS) of the zone-wise relative deviations,
+\begin{equation}
+  \mathrm{RMS} = \sqrt{\left\langle \delta F_i^2 \right\rangle_i}.
   \label{eqn:metrics_fs}
 \end{equation}
+The RMS therefore provides a single scalar measure of the average relative error over the entire fission source distribution, without accounting for the spatial arrangement of the residuals.
+
 Every uncertainty band reported in Sec.~\ref{sec:results} is $\pm2\sigma_{\text{tot}}$, matching the $|z|<2$ threshold used as the ``consistent with noise'' criterion, so that falling inside or outside a plotted band coincides with passing or failing that test. $\sigma_{\text{database}}$ in Eq.~(\ref{eqn:sigma_tot}) uses the analytical model (ii) throughout Sec.~\ref{sec:results}, validated next.
 
 
@@ -294,14 +298,14 @@ The pipeline is exercised on twelve validation cases, each a different in-core t
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=145mm]{figures/fig5a_temperature_distributions.png}
+  \includegraphics[width=160mm]{figures/fig5a_temperature_distributions.png}
   \caption{Reference-cases temperature distribution.}
   \label{fig:test_case_temperature_distribution_1}
 \end{figure}
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=145mm]{figures/fig5b_temperature_distributions.png}
+  \includegraphics[width=160mm]{figures/fig5b_temperature_distributions.png}
   \caption{Reference-cases temperature distribution.}
   \label{fig:test_case_temperature_distribution_2}
 \end{figure}
