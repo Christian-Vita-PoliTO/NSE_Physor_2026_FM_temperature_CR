@@ -1,11 +1,4 @@
-% Simplified companion paper. AUTHOR LIST: carried over as a draft placeholder
-% from the PHYSOR 2026 paper / its journal extension -- confirm with
-% co-authors before submission. Deliberately trades the fuller statistical
-% machinery of the journal extension (cycle-wise pseudo-replicate covariance
-% estimation, Ledoit-Wolf shrinkage, Mahalanobis chi^2) for a shorter, more
-% direct pipeline centered on one practical question: given that the
-% interpolated fission matrix has no uncertainty of its own, how do we build
-% one, and does the correction ratio's benefit survive it?
+
 \documentclass{style/nseJournal}
 \usepackage{amssymb}
 \usepackage{placeins}
@@ -23,7 +16,7 @@
 \addAuthor{Nicolò Abrate}{a}
 \addAuthor{Sandra Dulla}{a}
 
-\addAffiliation{a}{Politecnico di Torino, DENERG, NEMO group, Turin, Italy}
+\addAffiliation{a}{Politecnico di Torino, DENERG, NEMO group, Torino, Italy}
 \addAffiliation{b}{Westinghouse Electric Company, Cranberry, PA, USA}
 \addAffiliation{c}{Nuclear Science and Engineering Program, Colorado School of Mines, Golden, CO, USA}
 \addAffiliation{d}{Mechanical Engineering Department, Colorado School of Mines, Golden, CO, USA}
@@ -88,7 +81,7 @@ where $S_j$ is the fission-neutron source integrated over region $j$, and the co
 Because each coefficient is defined per emitted source neutron, the fission multiplicity is already embedded in it: a source neutron that induces a fission contributes $\bar\nu$ neutrons to the destination region, not one. The matrix is nonsymmetric, so its eigenvalues and eigenvectors are in general complex, although the fundamental mode is strictly real and non-negative~\cite{CarneyANE2014}. A key practical feature of the method is that the coefficients can be accumulated at negligible additional cost during an ordinary Monte Carlo criticality calculation, by tallying, over the active cycles, the region of birth of each fission neutron against the region of birth of its parent. In this work the full $127\times127$ fission matrix (one region per fuel assembly) is obtained in this way from a single whole-core Serpent calculation, so that every coefficient reflects the complete core environment.
 
 
-\subsection{Database, Interpolation, and the Correction Ratio}
+\subsection{Database, Interpolation, and Correction Ratio}
 \label{sec:pipeline}
 
 Rather than tallying a fission matrix directly for every temperature field of interest, the method precalculates a database of fission matrices at a set of uniform reference temperatures and interpolates within it. To keep the methodology practical and computationally attractive, it is important to maintain good accuracy while relying on a compact and simply defined database. For this reason, the database considered here contains the coefficients $a_{ij}$ at only eight uniform temperatures spanning 300--1000~K in 100~K increments. For an arbitrary temperature field, each coefficient is first obtained by piecewise-linear interpolation between the two bracketing database temperatures, as described in Eq.~\ref{eqn:interp}.
@@ -148,13 +141,13 @@ Comparing an interpolated (and CTCR-corrected) result to a direct reference calc
 \begin{itemize}
   \item[(a)] \emph{Reference-case noise}, $\sigma_{\text{ref}}$: the statistical uncertainty Serpent reports directly for the single reference simulation being compared against. 
   
-  \item[(b)] \emph{Database noise}, $\sigma_{\text{interp}}$: the noise inherited by the interpolated (and corrected) matrix from the 8 database calculations it is built from. Unlike (a), this is not a quantity Serpent reports for any single run: the interpolated matrix is a new object with no MC replicas of its own, and must be constructed --- the subject of Sec.~\ref{sec:four_methods}.
+  \item[(b)] \emph{Database noise}, $\sigma_{\text{interp}}$: the noise inherited by the interpolated (and corrected) matrix from the 8 database calculations it is built from. Unlike (a), this is not a quantity Serpent reports for any single run: the interpolated matrix is a new object with no MC replicas of its own, and must be constructed. % --- the subject of Sec.~\ref{sec:four_methods}.
 \end{itemize}
 
 \subsection{Quantification of $\sigma_{\text{interp}}$}
 \label{sec:four_methods}
 
-All four approaches proposed here share the same recipe: the nominal eight-temperature database is perturbed with random noise, the interpolator and correction of Eq.~(\ref{eqn:ctcr}) are reapplied, and the procedure is repeated many times. The spread of the resulting $k_{\text{eff}}^{\text{interp}}$ and fission source $F^{\text{interp}}$ over these repetitions is the database-side uncertainty $\sigma_{\text{database}}$.
+In this work four different approaches are introduced to propagate the database uncertainty to the interpolated FM results. Three oh these methods share the same recipe: the nominal eight-temperature database is perturbed with random noise, the interpolator and correction of Eq.~(\ref{eqn:ctcr}) are reapplied, and the procedure is repeated many times. The spread of the resulting $k_{\text{eff}}^{\text{interp}}$ and fission source $F^{\text{interp}}$ over these repetitions is the database-side uncertainty. % $\sigma_{\text{database}}$.
 
 What distinguishes the four approaches is how the random perturbation is generated. Writing the perturbation of the retained coefficients as a vector $\boldsymbol\delta$ drawn from a zero-mean multivariate normal distribution, $\boldsymbol\delta\sim\mathcal{N}(\mathbf{0},\boldsymbol\Sigma)$, the covariance $\boldsymbol\Sigma$ factors as
 \begin{equation}
@@ -164,15 +157,15 @@ What distinguishes the four approaches is how the random perturbation is generat
 where $\mathbf{D}$ is the diagonal matrix of the per-coefficient standard deviations reported by Serpent, and $\boldsymbol\rho$ is the correlation matrix. The amplitude $\mathbf{D}$ is common to all approaches --- it is read directly from the nominal database --- so the four differ only in what they assume for $\boldsymbol\rho$: from neglecting correlation entirely, to predicting it analytically, to measuring it, to bypassing the construction altogether.
 
 \begin{enumerate}
-  \item[(i)] \textbf{Uncorrelated resampling ($\boldsymbol\rho=\mathbf{I}$).} Each retained coefficient is perturbed independently using only its own MC-reported variance, $a_{ij}\to a_{ij}+\delta_{ij}$ with $\delta_{ij}\sim\mathcal{N}(0,\sigma_{ij}^2)$. This is equivalent to setting $\boldsymbol\rho$ to the identity and is the simplified assumption adopted in prior FM uncertainty-quantification work~\cite{HeWaltersNSE2022}. It serves as the natural baseline against which to judge whether modeling correlation matters at all.
+      \item[(i)] \textbf{Uncorrelated resampling ($\boldsymbol\rho=\mathbf{I}$).} Each retained coefficient is perturbed independently using only its own MC-reported variance, $a_{ij}\to a_{ij}+\delta_{ij}$ with $\delta_{ij}\sim\mathcal{N}(0,\sigma_{ij}^2)$. This is equivalent to setting $\boldsymbol\rho$ to the identity and is the simplified assumption adopted in prior FM uncertainty-quantification work~\cite{HeWaltersNSE2022}. It serves as the natural baseline against which to evaluate the impact of modeling correlation.
 
-\item[(ii)] \textbf{Analytical model ($\boldsymbol\rho=\boldsymbol\rho_{\text{pred}}$).} The correlation matrix is predicted in closed form, $\boldsymbol\rho_{\text{pred}}$, derived in Sec.~\ref{sec:analytical_derivation} directly from the branching structure of the fission process. To the best of our knowledge, this closed-form prediction of the fission-matrix correlation structure from the branching process, and its use to build the interpolated matrix's uncertainty, has not been reported before: prior fission-matrix uncertainty-quantification work either neglects inter-coefficient correlation or estimates it empirically. The approach requires no Monte Carlo replicas beyond the single nominal database already needed for interpolation.
+    \item[(ii)] \textbf{Analytical model ($\boldsymbol\rho=\boldsymbol\rho_{\text{pred}}$).} The correlation matrix is predicted in closed form, $\boldsymbol\rho_{\text{pred}}$, derived in Sec.~\ref{sec:analytical_derivation} directly from the branching structure of the fission process. To the best of our knowledge, this closed-form prediction of the fission-matrix correlation structure from the branching process, and its use to build the interpolated matrix uncertainty, has not been reported before: prior fission-matrix uncertainty-quantification works either neglect inter-coefficient correlation or estimate it empirically. The approach requires no Monte Carlo replicas beyond the single nominal database already needed for interpolation.
 
-  \item[(iii)] \textbf{Correlated resampling, measured correlation ($\boldsymbol\rho=\hat{\boldsymbol\rho}$).} The correlation matrix is instead measured from the cycle-by-cycle tallies of a single MC run, treating each active cycle as a pseudo-replicate of the same underlying random vector. Since Serpent does not output the fission matrix on a per-cycle basis, this required a modification of the source code to tally and print each active cycle's fission matrix separately.
-  % Because the number of cycles is smaller than the number of retained coefficients, the estimate is regularized with Ledoit--Wolf shrinkage.
-  This $\hat{\boldsymbol\rho}$ is measured once, at 300~K, and reused unchanged at every other database temperature; the reasonableness of that reuse is examined in Sec.~\ref{sec:t_invariance}.
+    \item[(iii)] \textbf{Correlated resampling, measured correlation ($\boldsymbol\rho=\hat{\boldsymbol\rho}$).} The correlation matrix is instead measured from the cycle-by-cycle tallies of a single MC run, treating each active cycle as a pseudo-replica of the same underlying random vector. Since Serpent does not provide the fission matrix on a per-cycle basis, this required a modification of the source code to tally and print each active cycle's fission matrix separately.
 
-  \item[(iv)] \textbf{Brute force.} The full eight-temperature database is rebuilt from scratch $N=150$ times, with one genuinely independent MC replica per temperature per repetition, reapplying the interpolator and correction each time. This bypasses the $\boldsymbol\Sigma=\mathbf{D}\boldsymbol\rho\mathbf{D}$ construction entirely: correlations of every kind are present in the replicas by construction, with no modeling assumption. It is the most direct and most expensive estimate, and serves as the reference against which approaches (i)--(iii) are validated (Sec.~\ref{sec:validation}).
+  This $\hat{\boldsymbol\rho}$ is measured once, at 300~K, and reused unchanged at every other database temperature, with an analysis of the reasonableness of this approach.
+
+  \item[(iv)] \textbf{Brute force.} The full eight-temperature database is rebuilt from scratch $N=150$ times, with one genuinely independent MC replica per temperature per repetition, reapplying the interpolator and correction each time. This bypasses the $\boldsymbol\Sigma=\mathbf{D}\boldsymbol\rho\mathbf{D}$ construction entirely: all correlations are present in the replicas by construction, with no modeling assumption. It is the most direct and most expensive estimate, and serves as the reference against which approaches (i)--(iii) are validated (Sec.~\ref{sec:validation}).
 \end{enumerate}
 
 % \subsection{Quantification of $\sigma_{interp}$}
@@ -194,15 +187,15 @@ where $\mathbf{D}$ is the diagonal matrix of the per-coefficient standard deviat
 \subsection{Deriving the Analytical Correlation Model}
 \label{sec:analytical_derivation}
 
-Coefficients tallied within a single Monte Carlo criticality calculation are not, in general, statistically independent, because the number of neutron histories simulated per active cycle is fixed, a fact responsible for well-documented biases and correlations in cycle-based Monte Carlo estimators~\cite{BrissendenGarlick1986}. For two FM coefficients sharing the same source column $j$ (i.e., $a_{ij}$ and $a_{lj}$, $i\neq l$), this mechanism can be made concrete and, unlike the generic statement above, turned into a closed-form prediction.
+Coefficients tallied within a single Monte Carlo criticality calculation are not, in general, statistically independent, because the number of neutron histories simulated per active cycle is fixed, a fact responsible for well-documented biases and correlations in cycle-based Monte Carlo estimators~\cite{BrissendenGarlick1986}. For two FM coefficients sharing the same source column $j$ (i.e., $a_{ij}$ and $a_{lj}$, $i\neq l$), this mechanism can be made explicit and, unlike the generic statement above, turned into a closed-form prediction.
 
-At the start of a cycle, the number of source neutrons born in column $j$, $N_j$, is fixed (inherited from the previous cycle's fission bank). Each of these $N_j$ histories picks, independently of the others, exactly one outcome: it causes fission in some destination cell $i$ with probability $\pi_i$ (the same probability regardless of which of the $N_j$ histories is considered, since they are all born under identical conditions in column $j$), or it causes no fission at all, with the remaining probability. If it does cause fission, all $\bar\nu$ secondaries are born together at that one destination. Writing the contribution of history $s$ to destination $i$ as $X_s^{(i)} = \bar\nu\,I_s(i)$, where $I_s(i)$ is $1$ if history $s$ fissions in $i$ and $0$ otherwise, the retained coefficient is the per-source-neutron average
+At the start of a cycle, the number of source neutrons born in column $j$, $N_j$, is fixed (inherited from the previous cycle fission bank). Each of these $N_j$ histories picks, independently of the others, exactly one outcome: it causes fission in some destination cell $i$ with probability $\pi_i$ (the same probability regardless of which of the $N_j$ histories is considered, since they are all born under identical conditions in column $j$), or it causes no fission at all, with the remaining probability. If it does cause fission, all $\bar\nu$ secondaries are born together at that one destination. Writing the contribution of history $s$ to destination $i$ as $X_s^{(i)} = \bar\nu\,I_s(i)$, where $I_s(i)$ is $1$ if history $s$ fissions in $i$ and $0$ otherwise, the retained coefficient is the per-source-neutron average:
 \begin{equation}
   a_{ij} = \frac{1}{N_j}\sum_{s=1}^{N_j} X_s^{(i)} .
   \label{eqn:aij_def}
 \end{equation}
 
-A single history cannot fission in two distinct destinations at once, so $I_s(i)\,I_s(l)=0$ for $i\neq l$, and different histories are independent of one another (linear transport: simulated particles do not interact). Hence, for a single history,
+A single history cannot fission in two distinct destinations at once, so $I_s(i)\cdot I_s(l)=0$ for $i\neq l$, and different histories are independent of one another (linear transport: simulated particles do not interact). Hence, for a single history,
 \begin{equation}
   \operatorname{Var}\left(X_s^{(i)}\right) = \bar\nu^2\,\pi_i(1-\pi_i), \qquad
   \operatorname{Cov}\left(X_s^{(i)},X_s^{(l)}\right) = \bar\nu^2\left[\underbrace{E\big(I_s(i)I_s(l)\big)}_{=\,0} - \pi_i\pi_l\right] = -\bar\nu^2\,\pi_i\pi_l ,
@@ -214,7 +207,7 @@ and summing $N_j$ independent, identically distributed histories (thus summing o
   \operatorname{Cov}(a_{ij},a_{lj}) = -\frac{\bar\nu^2\,\pi_i\pi_l}{N_j}, \qquad i\neq l .
   \label{eqn:multinomial_cov}
 \end{equation}
-The covariance is \emph{negative} for every pair of destinations sharing a source column, and this is not an approximation of the sign: it follows directly from the fact that a fixed number of histories are being split, exhaustively and mutually exclusively, among the possible destinations, so that more of $N_j$ going to $i$ mechanically means less going to $l$. Dividing the covariance by the geometric mean of the two variances, the common factor $\bar\nu^2/N_j$ cancels exactly, leaving a correlation that depends only on the destination probabilities themselves, not on $N_j$, which is a Serpent run-time setting, not a physical property of the fission process:
+The covariance is \emph{negative} for every pair of destinations sharing a source column, and this  follows directly from the fact that a fixed number of histories are being split, exhaustively and mutually exclusively, among the possible destinations, so that more of $N_j$ going to $i$ mechanically means less going to $l$. Dividing the covariance by the geometric mean of the two variances, the common factor $\bar\nu^2/N_j$ cancels exactly, leaving a correlation that depends only on the destination probabilities themselves, not on $N_j$, which is a Serpent run-time setting, not a physical property of the fission process:
 \begin{equation}
   \rho_{\text{pred}}(i,l) = \frac{\operatorname{Cov}(a_{ij},a_{lj})}{\sqrt{\operatorname{Var}(a_{ij})\operatorname{Var}(a_{lj})}}
   = -\sqrt{\frac{\pi_i}{1-\pi_i}\cdot\frac{\pi_l}{1-\pi_l}} .
@@ -225,18 +218,18 @@ Equation~(\ref{eqn:rho_pi_form}) is written in terms of the destination probabil
   \rho_{\text{pred}}(i,l) = \kappa\,\frac{\sqrt{a_i a_l}}{\sqrt{(1+\kappa a_i)(1+\kappa a_l)}}, \qquad \kappa=-\frac{1}{\bar\nu},
   \label{eqn:rho_pred}
 \end{equation}
-the closed form used for method (ii), requiring only $\bar\nu$ (from \texttt{NUBAR} in \texttt{\_res.m}) and the reference FM's own mean values --- no additional MC replicas. (The multinomial variance and covariance results used in Eqs.~(\ref{eqn:single_history})--(\ref{eqn:multinomial_cov}) are standard; see, e.g., Ref.~\cite{CasellaBerger2002}.)
+which requires only $\bar\nu$ (from \texttt{NUBAR} in \texttt{\_res.m}) and the reference FM's own mean values -- no additional MC replicas. (The multinomial variance and covariance results used in Eqs.~(\ref{eqn:single_history}-\ref{eqn:multinomial_cov}) are standard; see, e.g., Ref.~\cite{CasellaBerger2002}.)
 
-\subsubsection{Why Coefficients in Different Columns Are Treated as Uncorrelated}
+\subsubsection{Uncorrelated treatment of Coefficients in Different Columns}
 \label{sec:cross_column}
 
-The argument above says nothing about coefficients that do \emph{not} share a column, $a_{ij}$ and $a_{kj'}$ with $j\neq j'$. It would be convenient, but not quite correct, to argue that $N_j$ and $N_{j'}$ are simply independent: the total population $N=\sum_j N_j$ is fixed by the simulation's particle count per cycle, so source regions compete for a shared budget and $\operatorname{Cov}(N_j,N_{j'})\neq0$ in general. This coupling, however, need not propagate to the \emph{normalized} coefficients themselves. By the law of total covariance,
+The derivation above does not apply to coefficients that do \emph{not} share a column, $a_{ij}$ and $a_{kj'}$ with $j\neq j'$. It would be convenient, but not quite correct, to argue that $N_j$ and $N_{j'}$ are simply independent: the total population $N=\sum_j N_j$ is fixed by the simulation's particle count per cycle, so source regions compete for a shared budget and $\operatorname{Cov}(N_j,N_{j'})\neq0$ in general. This coupling, however, need not propagate to the \emph{normalized} coefficients themselves. By the law of total covariance,
 \begin{equation}
   \operatorname{Cov}(a_{ij},a_{kj'}) = \underbrace{E\big[\operatorname{Cov}(a_{ij},a_{kj'}\mid N_j,N_{j'})\big]}_{\text{(I)}}
   + \underbrace{\operatorname{Cov}\big(E[a_{ij}\mid N_j],\, E[a_{kj'}\mid N_{j'}]\big)}_{\text{(II)}} .
   \label{eqn:total_cov_law}
 \end{equation}
-Term (I) vanishes because histories born in the disjoint columns $j$ and $j'$ are conditionally independent given $N_j,N_{j'}$ (again, no history-history interaction is assumed). Term (II) vanishes because $E[a_{ij}\mid N_j]=\pi_i$ is, by construction of the normalized estimator of Eq.~(\ref{eqn:aij_def}), a constant that does not depend on the realized value of $N_j$, so its covariance with anything is zero. This rules out one specific channel, competition for a shared per-cycle particle budget, as a source of cross-column correlation; it is not a claim that cross-column correlation is exactly zero for every other conceivable reason (e.g., spatially correlated local flux fluctuations, or the cycle-to-cycle propagation of the fission source itself~\cite{UekiNSE2003}), and a bootstrap check on 150 independent replicas at 300~K does find a small residual: coefficient pairs sharing a column are negative $59.95\%$ of the time (95\% CI $[59.48\%,60.30\%]$), against $51.13\%$ $[50.96\%,51.43\%]$ for pairs sharing a destination row and $51.20\%$ $[51.11\%,51.37\%]$ for pairs sharing neither --- both of the latter statistically distinguishable from the $50\%$ null, but by less than a tenth of the same-column effect. Method (ii) neglects this residual: a simplifying assumption, adopted because it is small relative to the effect being modeled, not a claim that it is absent. Its practical consequence is checked directly, not merely argued for, in Sec.~\ref{sec:validation}, where method (ii) is compared against a genuine brute-force reconstruction that makes no such assumption.
+where term (I) vanishes because histories born in the disjoint columns $j$ and $j'$ are conditionally independent given $N_j,N_{j'}$ (again, no history-history interaction is assumed). Term (II) vanishes because $E[a_{ij}\mid N_j]=\pi_i$ is, by construction of the normalized estimator of Eq.~(\ref{eqn:aij_def}), a constant that does not depend on the realized value of $N_j$, so its covariance with anything is zero. This rules out one specific channel, competition for a shared per-cycle particle budget, as a source of cross-column correlation; it is not a claim that cross-column correlation is exactly zero for every other conceivable reason (e.g., spatially correlated local flux fluctuations, or the cycle-to-cycle propagation of the fission source itself~\cite{UekiNSE2003}), and a bootstrap check on 150 independent replicas at 300~K does find a small residual: coefficient pairs sharing a column are negative $59.95\%$ of the time (95\% CI $[59.48\%,60.30\%]$), against $51.13\%$ $[50.96\%,51.43\%]$ for pairs sharing a destination row and $51.20\%$ $[51.11\%,51.37\%]$ for pairs sharing neither --- both of the latter statistically distinguishable from the $50\%$ null, but by less than a tenth of the same-column effect. Method (ii) neglects this residual, as a simplifying assumption, since  such residual is small relative to the effect being modeled. Its practical consequence is going to be illustrated in the result section,  where method (ii) is compared against a genuine brute-force reconstruction that makes no such assumption.
 
 \subsubsection{Is Reusing One Correlation Matrix Across Temperature Reasonable?}
 \label{sec:t_invariance}
@@ -270,16 +263,16 @@ $\boldsymbol\rho$(1000~K), split-half internal noise floor & 0.909 \\ \hline
 \end{tabular}
 \end{table}
 
-The 300~K-vs-1000~K distance is \emph{smaller} than the noise floor of estimating $\boldsymbol\rho$ from half the data at a single, fixed temperature. By this measure the correlation matrix changes less between the two temperature extremes than a single-temperature estimate fluctuates under its own finite statistics, so reusing one matrix across the whole database is at least as reasonable as trusting the estimate at any one temperature on its own.
+The 300~K vs. 1000~K distance is \emph{smaller} than the noise floor of estimating $\boldsymbol\rho$ from half the data at a single, fixed temperature. By this measure we can state that the correlation matrix changes less between the two temperature extremes than a single-temperature estimate fluctuates under its own finite statistics, so reusing one matrix across the whole database is at least as reasonable as trusting the estimate at any one temperature on its own.
 
 
-\subsection{Error Metrics}
+\subsection{Definition of error metrics}
 \label{sec:metrics}
 
-Two plain metrics are used throughout, deliberately without a covariance-weighted quadratic form such as a Mahalanobis distance: they are less sensitive to the \emph{spatial pattern} of a residual, but directly interpretable, which is what matters for the case-by-case comparison of Sec.~\ref{sec:results}. For $k_{\text{eff}}$,
+Two plain metrics are used throughout, deliberately without a covariance-weighted quadratic form such as a Mahalanobis distance: they are less sensitive to the \emph{spatial pattern} of a residual, but directly interpretable, which is what matters for our case-by-case comparison. For $k_{\text{eff}}$,
 \begin{equation}
   \Delta k_{\text{eff}} = k_{\text{eff}}^{\text{interp}} - k_{\text{eff}}^{\text{ref}}, \qquad
-  z = \frac{\Delta k_{\text{eff}}}{\sigma_{\text{tot}}} ;
+  z = \frac{\Delta k_{\text{eff}}}{\sigma_{\text{tot}}} .
   \label{eqn:metrics_keff}
 \end{equation}
 For the fission source $F$ (normalized to unit sum over the 127 zones), the local relative deviation in each zone is defined as
@@ -300,7 +293,7 @@ Every uncertainty band reported in Sec.~\ref{sec:results} is $\pm2\sigma_{\text{
 \section{Results}
 \label{sec:results}
 
-The pipeline is exercised on twelve validation cases, each a different in-core temperature field imposed on the HPMR model of Sec.~\ref{sec:geometry}, reported in Figure~\ref{fig:test_case_temperature_distribution_1} and Figure~\ref{fig:test_case_temperature_distribution_2}. They are chosen to span a wide range of spatial sharpness, since it is precisely under sharp gradients that the local-temperature interpolation assumption --- and hence the CTCR --- is most severely tested. The set comprises two spatially sharp ``Dirac'' perturbations, in which a single central assembly is offset in temperature from an otherwise uniform core; a six-assembly and two ring-shaped hot-spot patterns; a smooth linear gradient across the core; and six power-shaped profiles of varying peak sharpness and radial offset. Each case is evaluated in both the \emph{raw} (interpolation only) and \emph{corrected} (interpolation plus CTCR) variants of Sec.~\ref{sec:pipeline}, against a direct Serpent reference calculation of the same temperature field.
+The pipeline is applied on twelve validation cases, each a different in-core temperature field imposed on the HPMR model, reported in Figure~\ref{fig:test_case_temperature_distribution_1} and Figure~\ref{fig:test_case_temperature_distribution_2}. They are chosen to span a wide range of spatial sharpness, since it is precisely under sharp gradients that the local-temperature interpolation assumption -- and hence the CTCR -- is most severely tested. The set comprises two spatially sharp ``Dirac'' perturbations, in which a single central assembly is offset in temperature from an otherwise uniform core; a six-assembly and two ring-shaped hot-spot patterns; a smooth linear gradient across the core; and six power-shaped profiles of varying peak sharpness and radial offset. Each case is evaluated in both the \emph{raw} (interpolation only) and \emph{corrected} (interpolation plus CTCR) variants of Sec.~\ref{sec:pipeline}, against a direct Serpent reference calculation of the same temperature field.
 
 \begin{figure}[t]
   \centering
@@ -317,10 +310,10 @@ The pipeline is exercised on twelve validation cases, each a different in-core t
 \end{figure}
 
 
-\subsection{Reference-Case Uncertainty}
+\subsection{Reference Case Uncertainty}
 \label{sec:res_reference}
 
-Figure~\ref{fig:fig1} shows the reference-case uncertainty $\sigma_{\text{ref}}$, source (a) of Sec.~\ref{sec:uncertainty}, on its own. Averaged over the twelve cases it is 9.7~pcm on $k_{\text{eff}}$ and 0.309\% (RMS) on the fission source, and is essentially uniform across cases; the one mild outlier is the Power shape 300--1000~K case (12.5~pcm, 0.42\%), whose broader, shallower temperature profile produces a less peaked fission-source distribution and hence a statistically noisier detector tally. This is only half of the noise budget of Eq.~(\ref{eqn:sigma_tot}): on its own it says nothing about the uncertainty introduced by the interpolation, quantified next.
+Figure~\ref{fig:fig1} shows the reference-case uncertainty $\sigma_{\text{ref}}$ (see Eq. \ref{eqn:sigma_tot}). Averaged over the twelve cases it is 9.7~pcm on $k_{\text{eff}}$ and 0.309\% (RMS) on the fission source, and is essentially uniform across cases; the one mild outlier is the Power shape 300--1000~K case (12.5~pcm, 0.42\%), whose broader, shallower temperature profile produces a less peaked fission-source distribution and hence a statistically noisier detector tally. This is only half of the noise budget of Eq.~(\ref{eqn:sigma_tot}): on its own it says nothing about the uncertainty introduced by the interpolation, quantified next.
 
 \begin{figure}[t]
   \centering
@@ -332,7 +325,7 @@ Figure~\ref{fig:fig1} shows the reference-case uncertainty $\sigma_{\text{ref}}$
 \subsection{Validating the Database-Noise Models Against Brute Force}
 \label{sec:validation}
 
-Figure~\ref{fig:fig2} compares the three inexpensive approaches of Sec.~\ref{sec:four_methods}, uncorrelated (i), analytical (ii), and single-seed measured (iii),against the brute-force reconstruction (iv), for the corrected variant of all twelve cases, on both observables. Agreement is summarized by the mean absolute deviation from brute force across the twelve cases.
+Figure~\ref{fig:fig2} compares the three inexpensive approaches: uncorrelated ($i$), analytical ($ii$), and single-seed measured ($iii$), against the brute-force reconstruction ($iv$), for the corrected variant of all twelve cases, on both observables. Agreement is summarized by the mean absolute deviation from brute force across the twelve cases.
 The ordering of the interpolated uncertainties $\sigma_{\text{interp}}$ predicted by the three models, excluding the brute-force results, which are used here as reference, is consistent with expectations in almost all the test cases. The uncorrelated model
 systematically yields the largest $\sigma_{\text{interp}}$, and therefore the widest
 confidence intervals, the only exception being $k_{\text{eff}}$ in Test Case~4; the
@@ -469,15 +462,15 @@ Power inverse Tmin650    & 120 & 119 & 114 & 115 & 117 & 116 & 117 & 116 \\ \hli
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=110mm]{figures/hex_index_map.png}
+  \includegraphics[width=90mm]{figures/hex_index_map.png}
   \caption{Hexagon-index map (1--127) referenced by the zone-index axis of Fig.~\ref{fig:fig5} and Figs.~\ref{fig:fig5_appendix_a}--\ref{fig:fig5_appendix_b}; hexagon 64 is the central assembly $C$ of the Dirac calibration cases (Sec.~\ref{sec:pipeline}).}
   \label{fig:hex_map}
 \end{figure}
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=110mm]{figures/fig5_fission_source_selected.png}
-  \caption{Fission-source relative deviation from the reference, zone by zone, true brute-force replicas only (Track A, $N=150$, no resampling assumption): raw ensemble (gray) and corrected ensemble (red, or gold where ``rescued''), together with the raw (black, filled) and corrected (dark red, or gold where rescued) point estimates, and the reference case's own $\pm2\sigma_{\text{ref}}$ drawn as its true zone-by-zone curve (dashed black lines) rather than a single flattened value. A corrected point --- ensemble replica or point estimate --- is colored gold precisely when it falls inside this band \emph{and} the matching raw point (same zone, same replica) was outside it, i.e., where the correction turned a discrepancy raw could not explain by noise into one it can; every other corrected point keeps the base red. Six representative cases, each row pairing a large rescued fraction (left) against a nearly unaffected case (right): Rings 1000~K / Power Tmin650 DT100, Rings 600/1000~K / Power Tmin650 DT200, 6~assemblies 1000~K / Power inverse Tmin650.}
+  \includegraphics[width=150mm]{figures/fig5_fission_source_selected.png}
+  \caption{Relative error of $F_i$ of the raw (red dots) and corrected (black dotes) cases. The results dispersion is computed relying on true brute-force method only. The corrected points is colored gold when is within the $\pm2\sigma_{\text{ref}}$ and all the raw points of the same cell were outside it. So, if some black dots are already inside the reference case uncertainty band, none of the red dots will be switched gold. Six representative cases, each row pairing a large rescued fraction (left) against a nearly unaffected case (right): Rings 1000~K / Power Tmin650 DT100, Rings 600/1000~K / Power Tmin650 DT200, 6~assemblies 1000~K / Power inverse Tmin650.}
   \label{fig:fig5}
 \end{figure}
 
