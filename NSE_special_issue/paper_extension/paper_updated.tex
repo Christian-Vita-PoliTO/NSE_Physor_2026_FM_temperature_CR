@@ -111,7 +111,7 @@ This correction is calibrated from two additional, directly simulated FMs, shown
 \end{figure}
 
 
-Because the correction must handle both a locally \emph{hot} cell embedded in a colder surrounding and the reverse case, both Dirac FMs of Figure~\ref{fig:dirac_distributions} are used: one with the central assembly $C$ driven to the hottest database temperature (1000~K) while the rest of the core sits at the coldest (300~K), and one with the assignment reversed. Comparing each Dirac FM against its own locally-interpolated counterpart gives two ratios, each a function of the geometric distance $d$ between $C$ and a generic cell $j$ (exploiting the hexagonal core's sextant symmetry, so that only $d$, not direction, matters),
+Because the correction must handle both a locally \emph{hot} cell embedded in a colder surrounding and the reverse case, both Dirac FMs of Figure~\ref{fig:dirac_distributions} are used: one with the central assembly $C$ driven to the hottest database temperature (1000~K) while the rest of the core sits at the coldest (300~K), and one with the assignment reversed. Comparing each Dirac FM against its own locally-interpolated counterpart gives two ratios, each a function of the geometric distance $d$ between $C$ and a generic cell $j$, including $j=C$ itself ($d=0$) (exploiting the hexagonal core's sextant symmetry, so that only $d$, not direction, matters),
 \begin{equation}
   r^{+}(d) = \frac{a^{\text{dirac},+}_{Cj}}{a^{\text{interp}}_{Cj}},
   \qquad
@@ -123,10 +123,15 @@ where the superscript $+$ ($-$) denotes the hot-center (cold-center) Dirac case,
 For an arbitrary temperature field, the correction applied to a generic interpolated coefficient $a^{\text{interp}}_{kl}$ is
 \begin{equation}
   \hat r_{kl}(\Delta T_{kl}, d) = \frac{\Delta T_{kl}}{\Delta T_{\text{dirac}}} \left( r^{\pm}(d) - 1 \right) + 1,
-  \qquad \Delta T_{kl} = T_k - T_l,
+  \qquad
+  \Delta T_{kl} =
+  \begin{cases}
+    T_k - T_l, & k \neq l, \\[4pt]
+    T_k - \dfrac{1}{|\mathcal{N}(k)|}\displaystyle\sum_{n\in\mathcal{N}(k)} T_n, & k = l,
+  \end{cases}
   \label{eqn:ctcr}
 \end{equation}
-where $\Delta T_{\text{dirac}} = 700$~K is the calibration temperature span common to both Dirac cases, and $r^{+}(d)$ is used when $\Delta T_{kl}>0$ (cell $k$ hotter than $l$) while $r^{-}(d)$ is used when $\Delta T_{kl}<0$ --- i.e., the calibration case matching the \emph{sign} of the local temperature difference, evaluated at its own geometric distance $d$.
+where $\Delta T_{\text{dirac}} = 700$~K is the calibration temperature span common to both Dirac cases, and $r^{+}(d)$ is used when $\Delta T_{kl}>0$ (cell $k$ hotter than $l$, or than its own first-ring neighborhood average $\mathcal{N}(k)$ when $k=l$) while $r^{-}(d)$ is used when $\Delta T_{kl}<0$ --- i.e., the calibration case matching the \emph{sign} of the local temperature difference, evaluated at its own geometric distance $d$. For a diagonal coefficient ($k=l$, $d=0$) this reuses $r^{\pm}(0)$ from the same Dirac calibration of Eq.~\ref{eqn:ratio_def}, so no additional simulation or calibration data is needed to cover this case.
 
 In this work the two variants compared are referred to as \emph{raw} (interpolation only) and \emph{corrected} (interpolation plus CTCR).
 
@@ -383,7 +388,7 @@ The seed-to-seed spread is negligible: two to three orders of magnitude below bo
 \subsection{Does the Correction Ratio Help at the Point-Estimate Level?}
 \label{sec:res_raw_vs_corrected}
 
-Figure~\ref{fig:fig3} compares raw and corrected interpolation against the direct reference, before any uncertainty is folded in, and Table~\ref{tab:reference_results} reports the underlying per-case numbers. Averaged over the twelve cases, the CTCR reduces the mean absolute $k_{\text{eff}}$ discrepancy from 40.8 to 31.0~pcm (24\%) and the mean fission-source RMS discrepancy from 1.27\% to 0.96\% (25\%). The benefit is markedly uneven. It is largest for the sharpest, most localized profiles --- Rings 1000~K improves from $57.4$ to $0.7$~pcm, and 6~assemblies 1000~K from $53.9$ to $23.5$~pcm --- consistent with the CTCR having been calibrated against a sharp central perturbation. For smoother, less localized profiles it is negligible or mildly unfavorable, the Power Tmin650 DT200 case worsening from $-41.5$ to $-52.5$~pcm. This geometric dependence is expected from the way the correction is constructed (Sec.~\ref{sec:pipeline}): calibrated on a Dirac-like perturbation, it is most effective where the true field most resembles one.
+Figure~\ref{fig:fig3} compares raw and corrected interpolation against the direct reference, before any uncertainty is folded in, and Table~\ref{tab:reference_results} reports the underlying per-case numbers. Averaged over the twelve cases, the CTCR reduces the mean absolute $k_{\text{eff}}$ discrepancy from 40.8 to 23.7~pcm (42\%) and the mean fission-source RMS discrepancy from 1.27\% to 0.94\% (26\%). The benefit is markedly uneven. It is largest for the sharpest, most localized profiles --- Rings 1000~K improves from $57.4$ to $1.2$~pcm, and 6~assemblies 1000~K from $53.9$ to $24.0$~pcm --- consistent with the CTCR having been calibrated against a sharp central perturbation. For smoother, less localized profiles it is negligible or mildly unfavorable, the Power Tmin650 DT200 case worsening from $-41.5$ to $-52.8$~pcm. This geometric dependence is expected from the way the correction is constructed (Sec.~\ref{sec:pipeline}): calibrated on a Dirac-like perturbation, it is most effective where the true field most resembles one.
 
 \begin{table}[h]
 \centering
@@ -393,19 +398,19 @@ Figure~\ref{fig:fig3} compares raw and corrected interpolation against the direc
 \hline
  & \multicolumn{2}{c}{$\Delta k_{\text{eff}}$ [pcm]} & \multicolumn{2}{c}{Fission-source RMS [\%]} \\
 Case & raw & corrected & raw & corrected \\ \hline
-Dirac 1000~K            & 79.7  & 13.5  & 0.972 & 0.844 \\
-Dirac 300~K              & $-$55.4 & $-$15.4 & 1.064 & 0.979 \\
-6 assemblies 1000~K      & 53.9  & 23.5  & 1.451 & 0.837 \\
-Rings 1000~K             & 57.4  & 0.7   & 2.411 & 1.157 \\
-Rings 600/1000~K         & 42.0  & 19.5  & 2.084 & 1.292 \\
+Dirac 1000~K            & 79.7  & 13.5  & 0.972 & 0.838 \\
+Dirac 300~K              & $-$55.4 & $-$15.4 & 1.064 & 0.975 \\
+6 assemblies 1000~K      & 53.9  & 24.0  & 1.451 & 0.794 \\
+Rings 1000~K             & 57.4  & 1.2   & 2.411 & 1.052 \\
+Rings 600/1000~K         & 42.0  & 19.5  & 2.084 & 1.244 \\
 Linear 300--900~K        & $-$46.3 & $-$45.8 & 1.525 & 1.212 \\
-Power shape 300--1000~K  & 31.7  & $-$6.3  & 1.828 & 1.463 \\
-Power Tmin650 DT100      & 11.7  & 6.2   & 0.680 & 0.687 \\
-Power Tmin650 DT200      & $-$41.5 & $-$52.5 & 0.772 & 0.749 \\
-Power Tmin650 DT300      & $-$5.2  & $-$21.7 & 0.932 & 0.808 \\
-Power spike Tmin350      & $-$18.4 & $-$24.1 & 0.909 & 0.781 \\
-Power inverse Tmin650    & 46.0  & 51.7  & 0.671 & 0.670 \\ \hline
-Mean $|\cdot|$           & 40.8  & 31.0  & 1.275 & 0.956 \\ \hline
+Power shape 300--1000~K  & 31.7  & $-$7.4  & 1.828 & 1.456 \\
+Power Tmin650 DT100      & 11.7  & 6.0   & 0.680 & 0.688 \\
+Power Tmin650 DT200      & $-$41.5 & $-$52.8 & 0.772 & 0.748 \\
+Power Tmin650 DT300      & $-$5.2  & $-$22.2 & 0.932 & 0.806 \\
+Power spike Tmin350      & $-$18.4 & $-$24.3 & 0.909 & 0.775 \\
+Power inverse Tmin650    & 46.0  & 51.8  & 0.671 & 0.670 \\ \hline
+Mean $|\cdot|$           & 40.8  & 23.7  & 1.275 & 0.938 \\ \hline
 \end{tabular}
 \end{table}
 
