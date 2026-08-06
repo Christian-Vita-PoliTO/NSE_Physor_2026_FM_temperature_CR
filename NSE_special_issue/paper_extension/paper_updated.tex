@@ -277,14 +277,14 @@ Two plain metrics are used throughout, deliberately without a covariance-weighte
   z = \frac{\Delta k_{\text{eff}}}{\sigma_{\text{tot}}} .
   \label{eqn:metrics_keff}
 \end{equation}
-For the fission source $F$ (normalized to unit sum over the 127 zones), the local relative deviation in each zone is defined as
+The fission source $F$ is normalized to unit sum over the 127 cells giving $\tilde{F_i}$. Its local relative deviation in each zone is defined as
 \begin{equation}
-  \delta F_i = \frac{F_i^{\text{interp}} - F_i^{\text{ref}}}{F_i^{\text{ref}}}\times 100\%,
+    \qquad  \delta \tilde{F_i} = \frac{\tilde{F_i}^{\text{interp}} - \tilde{F_i}^{\text{ref}}}{\tilde{F_i}^{\text{ref}}}\times 100\%,
   \label{eqn:metrics_fs_delta}
 \end{equation}
 and the overall discrepancy between the interpolated and reference source distributions is summarized by the root-mean-square (RMS) of the zone-wise relative deviations,
 \begin{equation}
-  \mathrm{RMS} = \sqrt{\left\langle \delta F_i^2 \right\rangle_i}.
+  \mathrm{RMS} = \sqrt{\left\langle \delta \tilde{F_i}^2 \right\rangle_i}.
   \label{eqn:metrics_fs}
 \end{equation}
 The RMS therefore provides a single scalar measure of the average relative error over the entire fission source distribution, without accounting for the spatial arrangement of the residuals.
