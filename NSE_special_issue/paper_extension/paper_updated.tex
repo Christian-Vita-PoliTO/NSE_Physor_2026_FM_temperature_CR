@@ -2,6 +2,7 @@
 \documentclass{style/nseJournal}
 \usepackage{amssymb}
 \usepackage{placeins}
+\graphicspath{{./}{../../}}
 
 \begin{document}
 
@@ -224,7 +225,7 @@ If it does cause fission, all $\bar\nu$ secondaries are born together at that on
   \label{eqn:aij_def}
 \end{equation}
 
-A single history cannot fission in two distinct destinations at once, so $I_s(i)\cdot I_s(l)=0$ for $i\neq l$, and different histories are independent of one another (linear transport: simulated particles do not interact). Hence, for a single history,
+The tracking used here is analog: no variance reduction is applied, and a history is terminated when it causes fission. A single history therefore contributes to one destination only, so $I_s(i)\cdot I_s(l)=0$ for $i\neq l$, and different histories are independent of one another (linear transport: simulated particles do not interact). Under implicit capture, where a history survives absorption and may fission more than once, or under particle splitting, where the descendants of one source neutron are not independent, these two properties would have to be revisited. Hence, for a single history,
 \begin{equation}
   \operatorname{Var}\left(X_s^{(i)}\right) = \bar\nu^2\,\pi_i(1-\pi_i), \qquad
   \operatorname{Cov}\left(X_s^{(i)},X_s^{(l)}\right) = \bar\nu^2\left[\underbrace{E\big(I_s(i)I_s(l)\big)}_{=\,0} - \pi_i\pi_l\right] = -\bar\nu^2\,\pi_i\pi_l ,
@@ -249,6 +250,17 @@ Equation~(\ref{eqn:rho_pi_form}) is written in terms of the destination probabil
 \end{equation}
 which requires only $\bar\nu$ (from \texttt{NUBAR} in \texttt{\_res.m}) and the reference FM's own mean values -- no additional MC replicas. (The multinomial variance and covariance results used in Eqs.~(\ref{eqn:single_history}-\ref{eqn:multinomial_cov}) are standard; see, e.g., Ref.~\cite{CasellaBerger2002}.)
 
+Two simplifications in this derivation deserve a comment. The multiplicity $\bar\nu$ has been treated as a single constant, whereas $\nu$ depends on the incident neutron energy and each cell sees a slightly different spectrum. Each history has also been given the same weight, whereas Monte Carlo weights are not exactly unity.
+
+Neither affects the amplitude of the perturbation. The matrix $\mathbf{D}$ of Eq.~(\ref{eqn:sigma_factor}) is read from the statistical errors Serpent reports for each coefficient, and those already contain the local spectrum and the weights of the actual simulation. The multiplicity enters only through the conversion $\pi_i=a_i/\bar\nu$ needed to evaluate Eq.~(\ref{eqn:rho_pred}), because the common factor $\bar\nu^2/N_j$ cancels in Eq.~(\ref{eqn:rho_pi_form}). It is also worth noting that the multiplicity entering the tally is an expected value: Serpent increments the fission-matrix bin by the neutron weight times $\bar\nu(E_0)$, evaluated at the incident energy of the neutron inducing that fission, and the integer number of secondaries sent to the fission bank never enters the score. The form $X_s^{(i)}=\bar\nu\,I_s(i)$ therefore describes the estimator itself, and the variance of $\nu$ around its mean does not contribute to $\operatorname{Var}(a_{ij})$.
+
+Both simplifications enter the derivation at the same place. Neither changes the covariance of Eq.~(\ref{eqn:multinomial_cov}), which vanishes term by term as long as a history fissions once at most, whatever weight and multiplicity it carries; both change only the variance that normalizes it. Writing $c_i^2$ for the relative variance of the per-event score $w\,\bar\nu(E)$, conditional on a fission in $i$, Eq.~(\ref{eqn:rho_pi_form}) becomes
+\begin{equation}
+  \rho_{\text{pred}}(i,l) = -\sqrt{\frac{\pi_i}{1-\pi_i+c_i^2}\cdot\frac{\pi_l}{1-\pi_l+c_l^2}}\,,
+  \label{eqn:rho_pred_nu}
+\end{equation}
+and the model used here is the case $c_i^2=0$. For the present calculations $c^2$ is small. The energy dependence of $\bar\nu$ contributes $1.5\times10^{-4}$, obtained from the eleven-group $\bar\nu$, fission cross section and flux of the reference calculation, and corresponding to a $1.24\%$ RMS spread of $\bar\nu$ across the fission spectrum. The weights contribute a comparable amount, since they depart from unity only through the implicit treatment of $(n,xn)$ reactions, which here accounts for $1.2\times10^{-4}$ of the total source weight. Propagating $c^2=1.5\times10^{-4}$ through the full pipeline changes $\sigma_{\text{interp}}$ by $0.004\%$ on $k_{\text{eff}}$ and by $0.002\%$ on the fission-source RMS. Assigning conservatively the whole $1.24\%$ spread as an error on the $\bar\nu$ of Eq.~(\ref{eqn:rho_pred}) changes them by $0.33\%$ and $0.14\%$; for reference, the core-average $\bar\nu$ moves by $0.018\%$ over the whole $300$--$1000$~K database. The aim of Eq.~(\ref{eqn:rho_pred}) is to provide a justified definition of the correlation rather than an exact model of it, and these effects are well below the accuracy it demonstrates against the brute-force reconstruction in Sec.~\ref{sec:validation}.
+
 \subsubsection{Uncorrelated treatment of Coefficients in Different Columns}
 \label{sec:cross_column}
 
@@ -260,7 +272,7 @@ The derivation above does not apply to coefficients that do \emph{not} share a c
 \end{equation}
 where term (I) vanishes because histories born in the disjoint columns $j$ and $j'$ are conditionally independent given $N_j,N_{j'}$ (again, no history-history interaction is assumed). Term (II) vanishes because $E[a_{ij}\mid N_j]=\pi_i$ is, by construction of the normalized estimator of Eq.~(\ref{eqn:aij_def}), a constant that does not depend on the realized value of $N_j$, so its covariance with anything is zero. This rules out one specific channel, competition for a shared per-cycle particle budget, as a source of cross-column correlation; it is not a claim that cross-column correlation is exactly zero for every other conceivable reason (e.g., spatially correlated local flux fluctuations, or the cycle-to-cycle propagation of the fission source itself~\cite{UekiNSE2003}), and a bootstrap check on 150 independent replicas at 300~K does find a small residual: coefficient pairs sharing a column are negative $59.95\%$ of the time (95\% CI $[59.48\%,60.30\%]$), against $51.13\%$ $[50.96\%,51.43\%]$ for pairs sharing a destination row and $51.20\%$ $[51.11\%,51.37\%]$ for pairs sharing neither --- both of the latter statistically distinguishable from the $50\%$ null, but by less than a tenth of the same-column effect. Method (ii) neglects this residual, as a simplifying assumption, since  such residual is small relative to the effect being modeled. Its practical consequence is going to be illustrated in the result section,  where method (ii) is compared against a genuine brute-force reconstruction that makes no such assumption.
 
-\subsubsection{Is Reusing One Correlation Matrix Across Temperature Reasonable?}
+\subsubsection{Temperature Invariance of the Measured Correlation Matrix}
 \label{sec:t_invariance}
 
 Method (iii) assumes that the correlation matrix measured at 300~K also applies at the other database temperatures. The simplest test of this assumption is to measure $\boldsymbol\rho$ independently at the opposite end of the database range, 1000~K, and ask whether the two matrices differ by more than the statistical noise inherent in estimating either one.
@@ -532,7 +544,7 @@ Power inverse Tmin650    & 120 & 119 & 114 & 115 & 117 & 116 & 117 & 116 \\ \hli
 
 
 
-The pattern is consistent with the point-estimate result of Table~\ref{tab:reference_results}, but is sharper here: for the Rings cases the corrected count roughly doubles (e.g., Rings 1000~K rises from 36--41 to 77--88 zones out of 127, consistently across all four models), while for the smoothest profiles the shift is small or even mildly unfavorable (Dirac 300~K, Power Tmin650 DT100/DT200). It is important to emphasize the accurate reproduction of local quantities, since in many transient analyses the quantity of interest is not a core-averaged parameter but rather the most critical point in the system, such as a localized hot spot. In these situations, the reliability of the interpolated model is determined by its ability to accurately predict the behavior at that specific location, rather than by the overall agreement in terms of global quantities such as $k_{\text{eff}}$ or the RMS error. Indeed, it is the accuracy at the most critical zone—where an error would have the greatest impact—that ultimately determines whether the model can be trusted.
+The pattern is consistent with the point-estimate result of Table~\ref{tab:reference_results}, but is sharper here: for the Rings cases the corrected count roughly doubles (e.g., Rings 1000~K rises from 36--41 to 77--88 zones out of 127, consistently across all four models), while for the smoothest profiles the shift is small or even mildly unfavorable (Dirac 300~K, Power Tmin650 DT100/DT200). The Appendix collects the remaining six cases; among them Power shape 300--1000~K shows one of the largest improvements of the whole set, its corrected count rising from 59 to 76 zones (Fig.~\ref{fig:fig5_appendix_b}). It is important to emphasize the accurate reproduction of local quantities, since in many transient analyses the quantity of interest is not a core-averaged parameter but rather the most critical point in the system, such as a localized hot spot. In these situations, the reliability of the interpolated model is determined by its ability to accurately predict the behavior at that specific location, rather than by the overall agreement in terms of global quantities such as $k_{\text{eff}}$ or the RMS error. Indeed, it is the accuracy at the most critical zone—where an error would have the greatest impact—that ultimately determines whether the model can be trusted.
 
 
 % \begin{table}[h]
@@ -655,9 +667,9 @@ Overall the average error on the $k_{\text{eff}}$ and on the RMS of the fission 
 
 The authors would like to acknowledge that the research activity of the PhD project is sponsored by the Italian funding plan ``Piano Nazionale Ripresa e Resilienza'' (PNRR) and by Westinghouse Electric Company to support the development of methods for advanced reactors. This work has been carried over during the author's internship period at Westinghouse Electric Company. The methodology developed is an extension of the studies previously made during the author's internship activity at Argonne National Laboratory under the supervision and support of Dr.\ Nicolas Stauff and his research team.
 
-\section*{Appendix: Fission-Source Deviation, All Twelve Cases}
+\section*{Appendix: Fission-Source Deviation, Test Cases 7--12}
 
-Fig.~\ref{fig:fig5_frist_6_cases} in the main text shows the first six test cases, used to verify the CTCR effect. For completeness, Fig.\ref{fig:fig5_appendix_b} give the same plot, in the same style, for the remaining six test cases.
+Fig.~\ref{fig:fig5_frist_6_cases} in the main text shows the six test cases containing the most localized temperature perturbations, the regime for which the CTCR is calibrated. Fig.~\ref{fig:fig5_appendix_b} gives the same plot, in the same style, for the remaining six cases, which form the power-shaped family.
 
 % \begin{figure}[h]
 %   \centering
