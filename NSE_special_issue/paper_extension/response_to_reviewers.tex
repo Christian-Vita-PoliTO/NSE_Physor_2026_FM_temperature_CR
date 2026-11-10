@@ -1,0 +1,300 @@
+\documentclass[11pt]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{xcolor}
+\usepackage{parskip}
+% Section, equation, figure and table numbers are read from the compiled
+% manuscript (build/paper_updated.aux), so they stay consistent with it.
+% the manuscript's highlighting macros appear inside imported label titles:
+% define them before the labels are read
+\providecommand{\revA}[1]{#1}\providecommand{\revB}[1]{#1}\providecommand{\revC}[1]{#1}
+\usepackage{xr-hyper}
+\usepackage[draft]{hyperref}  % labels read from the manuscript; no links to it
+\externaldocument[P-]{build/paper_updated}
+
+\newenvironment{revcomment}[1]
+  {\par\medskip\noindent\textbf{Comment #1.}\ \itshape}
+  {\par}
+\newcommand{\response}{\par\noindent\textbf{Response.}\ }
+\newcommand{\changes}{\par\noindent\textbf{Changes.}\ }
+
+\begin{document}
+
+\begin{center}
+{\Large Response to the reviewers}\\[4pt]
+Manuscript NSE26-392 --- \emph{Definition of a Correction Ratio approach for Fission Matrix
+Temperature Interpolation and Monte Carlo Uncertainty Propagation Methods for Results Assessment}
+\end{center}
+
+\noindent Dear Editor,
+
+We thank you and the two reviewers for the careful reading of the manuscript and for
+the constructive comments. We address each comment below. In the revised manuscript,
+text changed in response to Reviewer~1 is shown in {\color{blue}blue} and text changed
+in response to Reviewer~2 in {\color{red}red}. Corrections made by the authors on their
+own initiative are shown in {\color{green!50!black}green} and are listed at the end of
+this letter (Other changes). Section, equation, figure and table numbers refer to the
+revised manuscript.
+
+%==============================================================================
+\section*{Reviewer 1}
+
+We thank the reviewer for the positive assessment and for the detailed comments,
+which helped us to improve the clarity of the derivation.
+
+% R1.1 ------------------------------------------------------------------------
+\begin{revcomment}{1.1}
+Figure 2 caption. There appears to be a typo in the caption. The phrase referring to
+the ``two additional cases'' appears to be a typo ``with.''
+\end{revcomment}
+\response Thank you; corrected.
+
+% R1.2 ------------------------------------------------------------------------
+\begin{revcomment}{1.2}
+Independence of the database temperatures. The manuscript appears to treat the eight
+database temperatures in the uncertainty analysis. It would be useful to discuss whether
+the uncertainties associated with these eight temperatures can reasonably be considered
+independent. Depending on how the FM database is generated i.e.\ with XS library
+generated with SERPENT, correlations between temperatures may be present.
+\end{revcomment}
+\response The fission matrices are tallied directly, in continuous energy, during the whole-core Serpent criticality calculation performed at each database temperature; no cross-section library or set of group constants is generated and shared between temperatures, so no statistical noise can propagate from one temperature to another through the cross sections. The uncertainty of the evaluated nuclear data is indeed correlated across temperatures, but it is a systematic uncertainty, common to the database and to the reference calculations, and outside the scope of this work, which addresses the Monte Carlo statistical noise.
+The statistical noise of the eight database matrices is therefore expected to be uncorrelated, and the brute-force replicas bear this out: over the 150 replicas available at each temperature, the correlation coefficient between the values of the same coefficient at two temperatures, averaged over all retained coefficients, lies between $-0.0007$ and $+0.0013$ for any two adjacent temperatures, i.e.\ it is consistent with zero.
+\changes Three sentences stating this have been added at the end of the description of the resampling procedure (Sec.~\ref{P-sec:four_methods}).
+
+% R1.3 ------------------------------------------------------------------------
+\begin{revcomment}{1.3}
+Definition of the perturbation $\delta$. Please clarify exactly which quantities are
+included in the small perturbation $\delta$. My understanding is that the perturbation
+is applied to the raw coefficients $a_{ij}$. If so, this should be stated explicitly.
+\end{revcomment}
+\response Yes, the perturbation is applied to the fission-matrix coefficients $a_{ij}$ of each database matrix, before interpolation and correction.
+\changes This is now stated explicitly where $\boldsymbol\delta$ is introduced (Sec.~\ref{P-sec:four_methods}).
+
+% R1.4 ------------------------------------------------------------------------
+\begin{revcomment}{1.4}
+Previous FM uncertainty-quantification work. The manuscript states that previous FM
+uncertainty-quantification studies either neglect inter-coefficient correlations or
+estimate them empirically. A citation should be provided to support this statement.
+\end{revcomment}
+\response The reference (He and Walters, NSE 2022) was given for method (i) but not repeated at this statement. Checking it again, we also made the statement more precise: He and Walters propagate the uncertainty of the RAPID database under two limiting assumptions, uncorrelated coefficients or a full positive correlation within each column. No reference supported the words ``estimate it empirically'', which have been removed.
+\changes The sentence in method (ii) now reads ``prior work [He and Walters] considered two limiting cases, no correlation between coefficients and a full positive correlation within each column, whereas the derivation of Sec.~\ref{P-sec:analytical_derivation} predicts that coefficients sharing a column are negatively correlated''; the description of method (i) has been adjusted accordingly.
+
+% R1.5 ------------------------------------------------------------------------
+\begin{revcomment}{1.5}
+Size of the covariance matrix. At the point where the covariance matrix $\Sigma$ is
+introduced, I recommend explicitly stating its dimensions as a useful sanity check for
+the reader. In particular, it should be made clear whether the notation incorporates all
+eight temperature points, in which case the covariance matrix would presumably have
+dimensions $8N^2\times 8N^2$, or whether $\Sigma$ is defined separately at each
+temperature and therefore has dimensions $N^2\times N^2$.
+\end{revcomment}
+\response We agree that this is a useful check. $\boldsymbol\Sigma$ is defined separately at each temperature. It is a $p\times p$ matrix, with $p=6539$ retained coefficients out of $N^2=16\,129$; coefficients smaller than $10^{-4}$ times the largest element of the 300~K matrix are discarded. For the analytical model it is block diagonal, with one block per source column ($41$ to $67$ coefficients each); the measured matrix of method (iii) is full. Since no coupling between temperatures is modeled (see Comment 1.2), the joint covariance of the eight matrices is the $8p\times8p$ block-diagonal matrix with the eight $\boldsymbol\Sigma(T)$ along its diagonal, which never needs to be assembled.
+\changes Added after Eq.~(\ref{P-eqn:sigma_factor}), together with the truncation criterion, which was missing. The block size in Eq.~(\ref{P-eqn:cholesky_draw}) has been corrected from $N\times N$ to $p_j\times p_j$.
+
+% R1.6 ------------------------------------------------------------------------
+\begin{revcomment}{1.6}
+Page 11 --- introduction to the subsections. The transition into subsections (i), (ii),
+etc.\ on page 11 feels somewhat abrupt. I recommend adding a short introductory paragraph
+explaining what is about to be derived and how the individual subsections relate to the
+overall uncertainty-quantification methodology.
+\end{revcomment}
+\response We agree.
+\changes A short paragraph now precedes the list, explaining that methods (i)--(iii) share the resampling procedure and differ only in the correlation matrix, while method (iv) rebuilds the database from independent replicas and serves as the reference (Sec.~\ref{P-sec:four_methods}).
+
+% R1.7 ------------------------------------------------------------------------
+\begin{revcomment}{1.7}
+Page 12 --- possible neutron histories and the statement ``causes fission in $i$ or
+causes fission not in $i$.'' This statement may require clarification. In a general MC
+simulation, there is another possible outcome: the neutron may not cause fission at all,
+for example because it is absorbed without fission or leaks from the system. This outcome
+has its own associated probability. If implicit capture is employed, or if leakage is
+excluded by the particular formulation, the statement may be valid, but the assumptions
+should be made explicit. The manuscript later discusses, after Eq.~(8), the case of
+implicit fission in which a particle's weight may be reduced and the particle can
+subsequently make another contribution to $a_{ij}$. However, this distinction is not yet
+clear to the reader at this point in the derivation. I recommend revising the
+presentation so that the assumptions concerning particle histories and variance-reduction
+techniques are established before the probabilistic model is introduced.
+\end{revcomment}
+\response The reviewer is right: the complement of ``fission in $i$'' includes fission in another cell, capture without fission, and leakage. The equations are unaffected, since $I_s(i)$ is the indicator of a fission in $i$ and $1-\pi_i$ is the probability of any other outcome, but the sentence was wrong.
+\changes The tracking assumptions (analog capture and fission, no splitting or weight windows, history terminated at fission) are now stated at the beginning of Sec.~\ref{P-sec:analytical_derivation}, before the probabilistic model. The only non-analog element of the calculations, Serpent's default implicit treatment of $(n,xn)$ reactions, is named there as well. Each history is now described as ending in exactly one of $N+1$ outcomes: a fission in one of the $N$ cells, or no fission; the incorrect sentence has been removed.
+
+% R1.8 ------------------------------------------------------------------------
+\begin{revcomment}{1.8}
+Page 12 --- Bernoulli versus multinomial/categorical distribution. Since the manuscript
+tracks $p_{i,1}, p_{i,2},\ldots,p_{i,N}$ as mutually exclusive outcomes, I recommend
+describing the resulting distribution as a categorical distribution for a single trial,
+or equivalently using a multinomial distribution when considering counts over multiple
+trials, rather than describing the overall set of outcomes as a Bernoulli distribution
+(page 12, line 19). A Bernoulli description would be appropriate for an individual binary
+indicator, but the categorical/multinomial formulation seems more natural for the
+complete set of mutually exclusive destinations considered here.
+\end{revcomment}
+\response Yes, the categorical description is the appropriate one.
+\changes The outcome of one history is now described by a categorical distribution over the $N+1$ outcomes, and the counts over the $N_j$ histories by a multinomial distribution; the Bernoulli description is kept only for the single indicator $I_s(i)$, which is the quantity used in Eq.~(\ref{P-eqn:single_history}).
+
+% R1.9 ------------------------------------------------------------------------
+\begin{revcomment}{1.9}
+Before Eq.~(9) --- definitions of variance and covariance. Before presenting the final
+expression in Eq.~(9), I recommend including the standard definitions of the variance and
+covariance of random variables. This would make the derivation easier to follow for
+readers who are less familiar with the underlying statistical definitions and would
+provide a clearer connection to the final form of Eq.~(9).
+\end{revcomment}
+\response Agreed.
+\changes The definitions of variance and covariance are given before Eq.~(\ref{P-eqn:single_history}), together with $E[I_s(i)]=E[I_s(i)^2]=\pi_i$ and $E[I_s(i)I_s(l)]=0$, from which the equation follows directly.
+
+% R1.10 -----------------------------------------------------------------------
+\begin{revcomment}{1.10}
+Eq.~(11) --- Pearson correlation coefficient. The manuscript defines $\rho$ as the
+Pearson correlation coefficient. I recommend adding a short explanatory sentence stating
+that the Pearson correlation coefficient measures the strength and direction of the
+linear relationship between two variables. This would help readers interpret the
+physical/statistical meaning of the values subsequently presented.
+\end{revcomment}
+\response Added, as suggested.
+\changes A sentence after Eq.~(\ref{P-eqn:rho_pi_form}) now explains that the Pearson coefficient measures the strength and direction of the linear relationship between two variables, and gives the typical magnitude of the predicted values (mean $-0.003$ over all same-column pairs at 300~K, strongest $-0.08$).
+
+% R1.11 -----------------------------------------------------------------------
+\begin{revcomment}{1.11}
+Page 15 --- bootstrap analysis. I found the bootstrap check based on 150 independent
+replicas at 300~K particularly interesting. The finding that coefficient pairs sharing a
+column are negative approximately 60\% of the time, compared with approximately 51\% for
+pairs sharing a destination row or sharing neither, may also have implications for the
+use of a series of fixed-source calculations to determine the FM rather than obtaining it
+from a full-core calculation. However, the current explanation is quite difficult to
+follow. I recommend expanding and restructuring this discussion to explain more clearly:
+what statistical hypothesis is being tested; what physical or MC mechanism is thought to
+produce the same-column anticorrelation; why the approximately 51\% results remain
+statistically distinguishable from the 50\% null despite their small effect size; and
+what these observations imply for FM-generation approaches.
+\end{revcomment}
+\response The presentation of this check was hard to follow, and in restructuring it we found that the original numbers had not been computed from the 150 independent replicas, as the text stated, but from the cycle-by-cycle fission matrices of 50 runs, pooled and bootstrapped over the runs. Cycles of the same run are not independent, the database uses end-of-run coefficients, and the repeated runs of a bootstrap resample bias a sign statistic, so the $\approx51\%$ of the original text was not a resolved correlation. The sign test has therefore been replaced by a direct test on the 150 independent replicas at all eight database temperatures: the standard deviation of each column sum measured on the replicas is compared with its prediction from the standard deviations of the individual coefficients, without correlation and with the analytical model (new Fig.~\ref{P-fig:column_sum}). Without correlation the prediction is too large in every column and at every temperature, by about 30\% on average (a factor of 1.66 in variance). With the analytical model the average over the columns agrees with the measurement within about 2\% at every temperature (ratio of measured to predicted variance $0.99\pm0.01$ on average).
+
+To keep the section short, the manuscript reports only this result, the figure and the statements on coefficients in different columns. The supporting checks lead to the same conclusion and are reported here. Formal tests calibrated by parametric bootstrap were applied to the same replicas: the likelihood ratio between the two hypotheses rejects the uncorrelated model at every temperature, and omnibus tests of the full block covariance (Ledoit and Wolf, \emph{Ann.\ Stat.}\ 30, 2002; Chen, Zhang and Zhong, \emph{J.\ Am.\ Stat.\ Assoc.}\ 105, 2010) do not reject the analytical one at any temperature; the likelihood-ratio test, which is more sensitive, rejects the analytical model at one temperature, 1000~K, where the variance ratio is lowest (0.96). Grouped by predicted value, the measured correlations follow the prediction over two orders of magnitude; the strongest pairs are $3.6\pm0.7\%$ more negative than predicted, a small residual outside the multinomial model. For coefficients in different columns the variance of the total sum bounds the mean correlation below $5\times10^{-5}$ in magnitude; pairs sharing a destination row show a small positive mean correlation, $+0.0003$, one tenth of the same-column value.
+
+The revised discussion follows the four points raised: the hypotheses compared (no correlation against the multinomial model, through the column sums); the mechanism (the multinomial competition of Sec.~\ref{P-sec:analytical_derivation}); the statistical resolution (individual pairs cannot be resolved with 150 replicas, while their accumulated effect on a column sum can); and the implications for fission-matrix generation. On the last point, the argument of Sec.~\ref{P-sec:analytical_derivation} applies to any set of analog histories started from one source region, including a fixed-source calculation, but the resulting correlation also depends on how the coefficients are tallied, normalized and reused for repeated units; for their fixed-source database, He and Walters found a full positive correlation within each column to be more accurate than no correlation.
+\changes New Sec.~\ref{P-sec:replica_check} and new Fig.~\ref{P-fig:column_sum}; two references added.
+
+% R1.12 -----------------------------------------------------------------------
+\begin{revcomment}{1.12}
+Section III.E.2 --- correction-factor study. I recommend adding an additional study in
+which the relative Frobenius distance is evaluated for the $r^+$ and $r^-$ cases as well.
+This would provide additional evidence regarding the effect of the correction-factor
+calculation and help demonstrate whether the observed behaviour is consistent across the
+relevant quantities.
+\end{revcomment}
+\response We interpret this comment as a request to verify whether the correlation structure changes in the two non-uniform (Dirac) configurations from which the correction ratios $r^{+}$ and $r^{-}$ are computed. The measured correlation of Sec.~\ref{P-sec:t_invariance} requires cycle-by-cycle fission matrices, which are not available for these runs; the analytical model, however, can be evaluated directly on any matrix. With the same relative Frobenius distance, $\boldsymbol\rho_{\text{pred}}$ of the hot-center configuration differs from that of the uniform 300~K matrix by 0.0014, and that of the cold-center configuration from the uniform 1000~K one by 0.0013, comparable to the spread of $\boldsymbol\rho_{\text{pred}}$ over the 150 brute-force replicas (mean 0.0013, maximum 0.0014; Table~\ref{P-tab:rho_pred_stability}). The non-uniform temperature fields therefore leave the predicted correlation structure unchanged within its statistical noise.
+A second reading of the comment concerns the correction factors themselves. The ratios $r^{+}$ and $r^{-}$ computed from the production calibration runs and from repeated runs with five times more histories differ by 0.34\% and 0.32\% in relative Frobenius norm over the distances used, so the correction factors are statistically stable; their effect on the corrected results is quantified in the response to Reviewer~2, Comment 2.2.
+\changes The check on $\boldsymbol\rho_{\text{pred}}$ has been added at the end of Sec.~\ref{P-sec:t_invariance}; the uncertainty of the correction factors is discussed in Sec.~\ref{P-sec:res_final}.
+
+% R1.13 -----------------------------------------------------------------------
+\begin{revcomment}{1.13}
+Typographical error --- $F\,k_{\mathrm{eff}}$. At line 49, the ``F'' preceding
+$k_{\mathrm{eff}}$ appears to be a typographical error.
+\end{revcomment}
+\response Thank you; corrected (``For $k_{\text{eff}}$'').
+
+% R1.14 -----------------------------------------------------------------------
+\begin{revcomment}{1.14}
+Section IV.D heading. ``Reuslts'' should be corrected to ``Results.''
+\end{revcomment}
+\response Thank you; corrected.
+
+% R1.15 -----------------------------------------------------------------------
+\begin{revcomment}{1.15}
+Table 4 caption. I recommend clarifying in the Table 4 caption that the reported
+quantity relates to power (or, if more technically appropriate in the context of the
+calculation, the fission source). The current caption does not make this sufficiently
+clear.
+\end{revcomment}
+\response Agreed; the quantity is the fission source.
+\changes The caption of Table~\ref{P-tab:hexcount} now reads ``Number of zones (out of 127) whose fission-source deviation is statistically consistent with noise''.
+
+% R1.16 -----------------------------------------------------------------------
+\begin{revcomment}{1.16}
+Future work --- extension to more general MC variance-reduction schemes. I recommend
+highlighting as future work an extension of the proposed FM uncertainty methodology to
+the more general case in which the MC simulation no longer follows the
+multinomial/categorical model assumed in the present derivation. This may occur, for
+example, when variance-reduction techniques such as implicit fission or particle
+splitting are employed. In these cases, a particle can make weighted and/or multiple
+contributions to the FM, changing the statistical structure of the coefficients and
+potentially their covariance. It could be that only method iii is feasible in this case
+as an analytical form of the distribution is not possible.
+\end{revcomment}
+\response The derivation already shows that non-unit weights only change the normalization of the variance (Eq.~(\ref{P-eqn:rho_pred_nu})), as long as each history contributes to a single destination. Implicit capture, implicit fission and particle splitting break this exclusivity, because one history or its descendants can contribute to several destinations; the closed form then no longer applies, and, as the reviewer suggests, the cycle-based estimate of method (iii) remains the general route.
+\changes A paragraph stating this as future work has been added to Sec.~\ref{P-sec:conclusions}.
+
+%==============================================================================
+\section*{Reviewer 2}
+
+Several of the reviewer's suggestions led us to state assumptions that were implicit and to correct the presentation of some results, for which we are grateful; we reply point by point.
+
+% R2.1 ------------------------------------------------------------------------
+\begin{revcomment}{2.1}
+Independence and generalizability of the CTCR validation. The two Dirac temperature configurations used to calibrate the CTCR are also included in the validation cases, limiting their independence. Furthermore, Eq.~(4) assumes that corrections calibrated at the core center can be transferred to arbitrary assembly pairs. Additional validation with off-center temperature perturbations and different background temperatures is recommended to assess the generalizability of this assumption.
+\end{revcomment}
+\response We agree with the first point and partly with the second.
+\emph{Independence.} The two Dirac configurations are the calibration cases themselves, evaluated with the same calculations, so they test the correction in-sample. The manuscript now states this, marks them in Table~\ref{P-tab:reference_results}, and also reports the results over the ten cases not used to compute the correction ratios: the mean absolute $k_{\text{eff}}$ discrepancy decreases from 35.4 to 25.5~pcm (28\%), and the mean fission-source RMS discrepancy from 1.33\% to 0.94\% (29\%).
+\emph{Generalizability.} The ten cases not used for the calibration already include off-center perturbations and other background temperatures: the central assembly heated together with six assemblies of the second ring, two ring patterns in the second and fourth rings, the second with two temperature levels (600 and 1000~K); a single assembly at 1000~K in the fourth of the six rings on a background of 350--450~K (power spike); a linear gradient; and power-shaped profiles with minimum temperatures between 350 and 670~K. The correction transfers to these configurations: it reduces the fission-source RMS discrepancy by 40--56\% in the six-assembly and ring cases and by 15\% for the single off-center assembly, whose corrected $k_{\text{eff}}$ is within the noise ($|z|=1.4$); over the ten cases, the mean absolute discrepancies decrease by 28\% on $k_{\text{eff}}$ and by 29\% on the fission source. The cases where the correction changes little, or increases the $k_{\text{eff}}$ discrepancy, are the smooth profiles, in which neighboring assemblies differ little in temperature; they are discussed in the response to Comment 2.4. The description of the cases in Sec.~\ref{P-sec:results} has been completed accordingly.
+\changes Sec.~\ref{P-sec:results}, Table~\ref{P-tab:reference_results}, Secs.~\ref{P-sec:res_raw_vs_corrected} and~\ref{P-sec:res_final}, Conclusions.
+
+% R2.2 ------------------------------------------------------------------------
+\begin{revcomment}{2.2}
+Uncertainty propagation of the CTCR calibration. The CTCR coefficients are derived from two additional Monte Carlo simulations, which also introduce statistical uncertainties. It is unclear whether these uncertainties are included in the propagation procedure described in Section III.D. The authors should clarify this treatment and evaluate the impact of calibration uncertainties on the corrected results. The statistical independence between calibration and reference simulations should also be addressed.
+\end{revcomment}
+\response The original manuscript did not say how the statistical uncertainty of the two calibration calculations is treated. The ratios $r^{\pm}$ are computed once and kept fixed in all realizations of methods (i)--(iv). Their uncertainty has been evaluated by propagating the Monte Carlo noise of the two Dirac calculations through the correction (500 realizations of the two Dirac matrices drawn with the analytical correlation model and the Serpent-reported uncertainties, $r^{\pm}$ recomputed for each and the correction reapplied to the twelve cases) and is now quantified in Sec.~\ref{P-sec:res_final}, together with its effect on the budget: between 0.1 and 6.2~pcm on the corrected $k_{\text{eff}}$, at most 28\% of $\sigma_{\text{interp}}$; added in quadrature it increases $\sigma_{\text{tot}}$ by at most 3.3\%, and no case crosses the $|z|=2$ threshold. A repetition of the two Dirac calculations with five times more histories changes $r^{\pm}$ by 0.2--0.4\% and the corrected $k_{\text{eff}}$ by at most 5.2~pcm, consistent with this estimate.
+As for independence, the reference and the calibration are the same calculation for the two Dirac cases (Comment 2.1). The other ten reference cases are separate calculations, none of which shares tallies with the calibration runs; as verified for the database temperatures (Reviewer~1, Comment 1.2), the statistical noise of separate calculations is uncorrelated.
+\changes Sec.~\ref{P-sec:four_methods} (the statement that the ratios are kept fixed, listed under Other changes, and the new sentence on their uncertainty), Sec.~\ref{P-sec:uncertainty} (third term of the comparison) and Sec.~\ref{P-sec:res_final} (calibration uncertainty).
+
+% R2.3 ------------------------------------------------------------------------
+\begin{revcomment}{2.3}
+Validity of the analytical correlation model. The temperature-invariance assessment in Table I compares full-sample correlation matrices with split-half estimates. The reported distance ratio (0.643/0.909) is close to $1/\sqrt{2}$, suggesting that the difference may largely reflect sample-size effects rather than temperature invariance. A comparison using consistent sample sizes is recommended. The influence of neglected cross-column correlations on local fission-source uncertainties also deserves further investigation.
+\end{revcomment}
+\response Both observations are correct.
+\emph{Temperature invariance.} The split-half estimates use half of the data, so their statistical noise is larger by a factor $\sqrt{2}$ than that of the full-sample estimates compared in the first row of Table~\ref{P-tab:t_invariance}; indeed $0.643/0.909=1/\sqrt{2}$ within rounding. Scaled to the full sample, the noise floor is $0.643$, equal to the observed distance: the two matrices differ by the amount expected from noise alone, and no temperature dependence is detectable at the (limited) resolution of the estimate. We have corrected the text and added the scaled noise floor to Table~\ref{P-tab:t_invariance}. This assumption concerns only method (iii): the analytical model (ii) is rebuilt at each database temperature from that temperature's own matrix and $\bar\nu$, which the manuscript now states explicitly.
+\emph{Cross-column correlations.} While the analytical model reproduces the brute-force $k_{\text{eff}}$ uncertainty within sampling noise (Comment 2.5), it underestimates the fission-source RMS uncertainty by 7.3\% on average, in all twelve cases. The cause is not identified: the mean correlation between coefficients of different columns is at least ten times smaller than within a column (Sec.~\ref{P-sec:replica_check}), but such pairs are 126 times more numerous than those sharing a column, so a collective effect on local quantities cannot be excluded. We now state this limitation explicitly, and list the extension of the model to cross-column correlations as future work.
+\changes Sec.~\ref{P-sec:t_invariance} and Table~\ref{P-tab:t_invariance}; Sec.~\ref{P-sec:validation}; Sec.~\ref{P-sec:conclusions}.
+
+% R2.4 ------------------------------------------------------------------------
+\begin{revcomment}{2.4}
+Identification of systematic error sources. The reflector temperatures differ between the database and some reference cases, introducing systematic discrepancies unrelated to interpolation accuracy. Moreover, several cases with sharp temperature gradients use temperatures already included in the database, making the attribution of residual errors to temperature-grid resolution questionable. The authors should better distinguish reflector effects, limitations of the local-temperature approximation, and interpolation errors through controlled comparisons.
+\end{revcomment}
+\response This comment led us to revise the interpretation of the residual discrepancies; we examined the contributions separately.
+\emph{Temperature of the region surrounding the assemblies}, to which the comment refers. The configuration studied is a simplified model used to test the method: the control drums and the beryllium reflector of the reference design are not represented, and the assemblies are surrounded by a low-density mixture of helium and stainless steel, so that the temperature effects in the fueled region, which are the object of the CTCR, are isolated from those of components outside it. The description in Sec.~\ref{P-sec:geometry} referred to the reference design and has been corrected. The temperature of this region does differ: in the database it follows the temperature of each reference point, whereas in the reference cases it is at 300~K (1000~K in the cold-center Dirac case, whose background is at 1000~K), as stated in the original manuscript. Given the low density of the region, this difference is expected to have little effect, and a controlled comparison confirms it: with an alternative database in which the region is at 300~K at all reference points, the raw $k_{\text{eff}}$ discrepancy changes by $-45$ to $+32$~pcm, with a mean of $-0.1$~pcm, consistent with the statistical noise of the two databases (normalized RMS 0.97); over the eleven cases concerned, the mean absolute discrepancy is 39.4~pcm with the production database and 38.1~pcm with the alternative one. The systematic discrepancy suggested by the reviewer is therefore not borne out in this configuration, and the statement of the original manuscript attributing an offset to this mismatch has been removed. In a reflected core, however, the reflector temperature would not be negligible: the database and the reference calculations should then use the same convention for it, which we now state as a requirement for the extension to the complete design. (At 300~K the two conventions describe the same state, so the production 300~K point was used in both databases.)
+\emph{Temperature grid and local-temperature approximation.} The five cases with the sharpest fields (the two Dirac, the six-assembly and the two ring cases) contain only database temperatures, so their interpolation in temperature is exact, and their raw discrepancy comes from the local-temperature approximation and from Monte Carlo noise only; attributing their residuals to the temperature grid was incorrect, as the reviewer points out. In these five cases, residuals exceeding the noise are therefore attributed to the local-temperature approximation.
+\emph{Reach of the correction.} The pattern of Table~\ref{P-tab:reference_results} indicates which part of the local-temperature error the CTCR leaves. Calibrated on a single perturbed assembly, the correction resolves the effect of a temperature difference only at short distance: the Dirac perturbation changes the coefficients that enter the ratios by about 6\% up to the second ring, and beyond it by less than their statistical noise. On $k_{\text{eff}}$ the correction is therefore effective where an assembly and its first neighbors differ strongly in temperature, as in the sharp cases, and nearly inactive in the smooth fields, where neighboring assemblies differ by a few tens of kelvin (50~K per row in the linear gradient) while the differences across the core reach several hundred kelvin. The part of the error due to the temperature of the more distant assemblies crossed by the neutrons is then left uncorrected, consistent with the cases where the correction changes $k_{\text{eff}}$ little (linear gradient) or increases its discrepancy (three of the four Tmin650 profiles), while the fission-source discrepancy still decreases there. This interpretation is now given in Sec.~\ref{P-sec:res_final}.
+\changes Sec.~\ref{P-sec:geometry}, Sec.~\ref{P-sec:res_final} and Sec.~\ref{P-sec:conclusions}.
+
+% R2.5 ------------------------------------------------------------------------
+\begin{revcomment}{2.5}
+Statistical reliability of uncertainty model comparisons. The brute-force benchmark uses 150 independent realizations, for which the estimated standard deviation has an approximate relative sampling uncertainty of 5.8\% under normality. This is comparable to the reported 4.6\% deviation of the analytical model, making the statistical significance of the comparison uncertain. Confidence intervals for the uncertainty estimates and empirical coverage tests would strengthen the validation of the proposed model.
+\end{revcomment}
+\response Confidence intervals and an empirical coverage test are now reported in Sec.~\ref{P-sec:validation}. With 150 replicas the brute-force standard deviation has a relative sampling uncertainty of 5.8\%, as the reviewer notes, and the synthetic estimates ($M=500$) of 3.2\%; an exact method would therefore show a mean absolute deviation of about 5\% (95th percentile 7.3\%). The 4.6\% of the analytical model lies within this floor: its mean signed deviation is $-2.4\%$, with a 95\% confidence interval of $[-6.3,\,2.9]\%$ (bootstrap over the replicas, accounting for the correlation between cases, which share the same databases), and its standard deviation lies within the 95\% confidence interval of the brute-force one in 11 of the 12 cases, consistent with chance (0.6 exceptions expected). The other two models significantly overestimate the uncertainty: $+7.3\%$ $[2.6,\,13.4]\%$ for (iii) and $+17.6\%$ $[12.7,\,24.5]\%$ for (i).
+Over the twelve cases, 66.8\% $[64.5,\,69.5]$ and 95.3\% $[93.9,\,96.4]$ of the brute-force replicas of $k_{\text{eff}}$ fall within one and two analytical standard deviations of their mean, against the nominal 68.3\% and 95.4\%; methods (iii) and (i) over-cover (71.2\% and 75.7\% at one standard deviation, 96.8\% and 98.1\% at two). For the fission source, the same test shows the slight under-coverage expected from the underestimate discussed in Comment 2.3 (93.6\% at two standard deviations).
+\changes Sec.~\ref{P-sec:validation}.
+
+%==============================================================================
+\section*{Other changes}
+
+While revising the manuscript we made the following corrections on our own initiative; they are shown in {\color{green!50!black}green}. Removed text is not visible in the marked copy and is listed here.
+\begin{itemize}
+\item Sec.~\ref{P-sec:geometry}: the description of the system referred to the reference HPMR design; it now describes the configuration actually modeled, a simplified model in which the control drums and the reflector are not represented (see the response to Reviewer~2, Comment 2.4).
+\item The manuscript now follows the journal format: 12-point font and 1.5 line spacing. Figure~\ref{P-fig:hex_map} is now cited before Fig.~\ref{P-fig:fig5_frist_6_cases}, so that figures are numbered in order of citation.
+\item Sec.~\ref{P-sec:four_methods}: the sentence stating that the database coefficients enter the numerator and the denominator of the calibration ratios, which did not describe the calculation, has been removed; the text now states that the correction ratios $r^\pm$ are computed once and kept fixed in all realizations. The Ledoit--Wolf regularization of the measured correlation matrix of method (iii), which was applied but not mentioned, is now stated.
+\item Eq.~(\ref{P-eqn:frobenius_rel}) now normalizes by the reference matrix, as in the calculations; the matrix dimension in Eq.~(\ref{P-eqn:frobenius_norm}) has been corrected.
+\item Sec.~\ref{P-sec:t_invariance}: the text now states that the matrices compared in Table~\ref{P-tab:t_invariance} are measured from the active cycles of 50 independent runs at each temperature (25\,000 cycles), without shrinkage.
+\item Sec.~\ref{P-sec:validation} and Sec.~\ref{P-sec:conclusions}: the labels of the fission-source comparison were exchanged. The correct values are 3.3\% (uncorrelated), 3.6\% (measured correlation) and 7.3\% (analytical model), the latter underestimating the brute-force value in all twelve cases. The explanation previously given, based on a cross-column residual, has been replaced by a statement that the cause is open (Comments 1.11 and 2.3). Fig.~\ref{P-fig:fig2} has been redrawn from the same data, since in the submitted version the brute-force markers of its fission-source panel did not correspond to the final calculation.
+\item The caption of Fig.~\ref{P-fig:fig5_frist_6_cases} described the colours of the raw and corrected points the wrong way round; it now matches the figure.
+\item Minor corrections: ``provided without any uncertainty'' (Introduction; the original wording inverted the meaning), consistent notation $\sigma_{\text{interp}}$ and $M=500$ for the synthetic realizations in the text, and several typographical errors.
+\end{itemize}
+
+\bigskip
+\noindent We are grateful to the reviewers for comments that have improved the manuscript.
+
+\medskip
+\noindent Sincerely,\\
+Christian Vita, on behalf of all authors
+
+\end{document}
